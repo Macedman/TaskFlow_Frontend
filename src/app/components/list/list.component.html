@@ -1,31 +1,52 @@
-<div class="example-container">
-  <h2>To do</h2>
+<div class="bg-yellow-600 px-6">
+  <div class="example-container">
+    <h2 class="text-2xl/9 text-white">To do</h2>
 
-  <div
-    cdkDropList
-    #todoList="cdkDropList"
-    [cdkDropListData]="todo"
-    [cdkDropListConnectedTo]="[doneList]"
-    class="example-list"
-    (cdkDropListDropped)="drop($event)">
-    @for (item of todo; track item) {
-      <div class="example-box" cdkDrag>{{item}}</div>
-    }
+    <div
+      cdkDropList
+      #todoList="cdkDropList"
+      [cdkDropListData]="todo"
+      [cdkDropListConnectedTo]="[doneList, doingList]"
+      class="example-list"
+      (cdkDropListDropped)="drop($event)"
+    >
+      @for (item of todo; track item) {
+      <div class="example-box" cdkDrag>{{ item }}</div>
+      }
+    </div>
   </div>
-</div>
 
-<div class="example-container">
-  <h2>Done</h2>
+  <div class="example-container">
+    <h2 class="text-2xl/9 text-white">Doing</h2>
 
-  <div
-    cdkDropList
-    #doneList="cdkDropList"
-    [cdkDropListData]="done"
-    [cdkDropListConnectedTo]="[todoList]"
-    class="example-list"
-    (cdkDropListDropped)="drop($event)">
-    @for (item of done; track item) {
-      <div class="example-box" cdkDrag>{{item}}</div>
-    }
+    <div
+      cdkDropList
+      #doingList="cdkDropList"
+      [cdkDropListData]="doing"
+      [cdkDropListConnectedTo]="[todoList, doneList]"
+      class="example-list"
+      (cdkDropListDropped)="drop($event)"
+    >
+      @for (item of doing; track item) {
+      <div class="example-box" cdkDrag>{{ item }}</div>
+      }
+    </div>
+  </div>
+
+  <div class="example-container">
+    <h2 class="text-2xl/9 text-white">Done</h2>
+
+    <div
+      cdkDropList
+      #doneList="cdkDropList"
+      [cdkDropListData]="done"
+      [cdkDropListConnectedTo]="[todoList, doingList]"
+      class="example-list"
+      (cdkDropListDropped)="drop($event)"
+    >
+      @for (item of done; track item) {
+      <div class="example-box" cdkDrag>{{ item }}</div>
+      }
+    </div>
   </div>
 </div>
