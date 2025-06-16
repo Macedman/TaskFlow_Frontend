@@ -1,2 +1,49 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
+
+:root{
+    --base-clr: #11121a;
+    --line-clr: #42434a;
+    --hover-clr: #222533;
+    --text-clr: #e6e6ef;
+    --accent-clr: #5e63ff;
+    --secondary-text-clr: #b0b3c1;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    line-height: 1.5rem;
+}
+
+body {
+    background-color: var(--base-clr);
+    color: var(--text-clr);
+    font-family: 'Inter', sans-serif;
+}
+
+.app-layout {
+  display: grid;
+  grid-template-areas: 
+    "navbar navbar"
+    "sidebar main";
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+}
+
+
+.navbar {
+  grid-area: navbar;
+  background-color: #5e63ff;
+}
+
+
+.main {
+  grid-area: main;
+}
+
