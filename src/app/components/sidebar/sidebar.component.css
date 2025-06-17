@@ -39,7 +39,7 @@ svg {
 }
 
 .sidebar > ul > li:first-child > button > svg {
-  margin-right: ;
+  margin-right: -15%;
 }
 
 .sidebar ul li.active a {

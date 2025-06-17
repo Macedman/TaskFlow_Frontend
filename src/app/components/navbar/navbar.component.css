@@ -1,0 +1,4 @@
+.navbar {
+    background-color: var(--base-clr);
+    border-bottom: 1px solid var(--line-clr);
+}
