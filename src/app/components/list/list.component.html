@@ -1,60 +1,6 @@
-<div class="main bg-yellow-600 px-6">
-  <div class="example-container">
-    <h2 class="text-2xl/9 text-white">To do</h2>
-
-    <div
-      cdkDropList
-      #todoList="cdkDropList"
-      [cdkDropListData]="todo"
-      [cdkDropListConnectedTo]="[doneList, doingList]"
-      class="example-list"
-      (cdkDropListDropped)="drop($event)"
-    >
-      @for (item of todo; track item) {
-      <div class="example-box" cdkDrag>{{ item }}</div>
-      }
-    </div>
-  </div>
-
-  <div class="example-container">
-    <h2 class="text-2xl/9 text-white">Doing</h2>
-
-    <div
-      cdkDropList
-      #doingList="cdkDropList"
-      [cdkDropListData]="doing"
-      [cdkDropListConnectedTo]="[todoList, doneList]"
-      class="example-list"
-      (cdkDropListDropped)="drop($event)"
-    >
-      @for (item of doing; track item) {
-      <div class="example-box" cdkDrag>{{ item }}</div>
-      }
-    </div>
-  </div>
-
-  <div class="example-container">
-    <h2 class="text-2xl/9 text-white">Done</h2>
-
-    <div
-      cdkDropList
-      #doneList="cdkDropList"
-      [cdkDropListData]="done"
-      [cdkDropListConnectedTo]="[todoList, doingList]"
-      class="example-list"
-      (cdkDropListDropped)="drop($event)"
-    >
-      @for (item of done; track item) {
-      <div class="example-box" cdkDrag>{{ item }}</div>
-      }
-    </div>
-  </div>
-
-
-  <div style="padding-bottom:2000px">
-  <p>In this example, the sticky element sticks to the top of the page (top: 0), when you reach its scroll position.</p>
-  <p>Scroll back up to remove the stickyness.</p>
-  <p>Some text to enable scrolling.. Lorem ipsum dolor sit amet, illum definitiones no quo, maluisset concludaturque et eum, altera fabulas ut quo. Atqui causae gloriatur ius te, id agam omnis evertitur eum. Affert laboramus repudiandae nec et. Inciderint efficiantur his ad. Eum no molestiae voluptatibus.</p>
-  <p>Some text to enable scrolling.. Lorem ipsum dolor sit amet, illum definitiones no quo, maluisset concludaturque et eum, altera fabulas ut quo. Atqui causae gloriatur ius te, id agam omnis evertitur eum. Affert laboramus repudiandae nec et. Inciderint efficiantur his ad. Eum no molestiae voluptatibus.</p>
+ <div class="flex-container">
+<div class="card" *ngFor="let key of keys">
+  <h4 class="card-title">{{key}}</h4>
+  <app-taskcard [taskList]="taskList"></app-taskcard>
 </div>
 </div>
