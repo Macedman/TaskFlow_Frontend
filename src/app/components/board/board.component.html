@@ -1,5 +1,13 @@
 <div class="app-layout">
 <app-navbar class="navbar"></app-navbar>
 <app-sidebar class="sidebar"></app-sidebar>
-<app-list class="main"></app-list>
+<div class="main">
+    <div class="flex flex-row gap-5">
+    @for (key of keys; track key) {
+<app-list [listTitle]="key" [cards]="taskList[key]" [connectedTo]="getConnectedTo(key)" (dropped)="onListDrop($event)"></app-list>
+} 
+<app-add-list></app-add-list>
+</div>
+</div>
+
 </div>

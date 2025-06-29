@@ -1,6 +1,18 @@
- <div class="flex-container">
-<div class="card" *ngFor="let key of keys">
-  <h4 class="card-title">{{key}}</h4>
-  <app-taskcard [taskList]="taskList"></app-taskcard>
-</div>
+<div class="bg-red-900 p-4 rounded w-80">
+  <h2 class="text-lg font-bold capitalize mb-2">{{ listTitle }}</h2>
+  
+  <div
+    cdkDropList
+    [id]="listTitle"
+    [cdkDropListData]="cards"
+    [cdkDropListConnectedTo]="connectedTo"
+    class="example-list bg-white p-2 rounded min-h-[100px]"
+    (cdkDropListDropped)="onDrop($event)"
+  >
+    @for (card of cards; track card) {
+      <app-taskcard [cardTitle]="card"></app-taskcard>
+    } @empty {
+      <div class="text-gray-400 italic">No items</div>
+    }
+  </div>
 </div>

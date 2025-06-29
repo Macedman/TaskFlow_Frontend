@@ -1,27 +1,31 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { TaskcardComponent } from '../taskcard/taskcard.component';
-import { ListType } from '../list/list.model';
 import { CommonModule } from '@angular/common';
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 
 
 @Component({
   selector: 'app-list',
-  imports: [TaskcardComponent, CommonModule],
+  imports: [TaskcardComponent, CommonModule, CdkDropList, CdkDrag],
   templateUrl: './list.component.html',
   styleUrl: './list.component.css'
 })
 export class ListComponent implements OnInit {
+  @Input() listTitle: string = '';
+  @Input() cards: string[] = [];
+  @Input() connectedTo: string[] = [];
 
-  taskList: ListType = {
-  todo: ['Get to work', 'Pick up groceries', 'Go home', 'Fall asleep'],
-  doing: ['Backend', 'Frontend', 'Database', 'Play Dota'],
-  done: ['Get up', 'Brush teeth', 'Take a shower', 'Check e-mail', 'Walk dog']
-};
+  @Output() dropped = new EventEmitter<CdkDragDrop<string[]>>();
 
-keys = Object.keys(this.taskList);
+  onDrop(event: CdkDragDrop<string[]>) {
+    this.dropped.emit(event)
+  }
+
 
   ngOnInit() {
-    //fetch data
-    console.log(this.keys)
+    console.log('List Title', this.listTitle);
+    console.log('Cards', this.cards);
+    console.log('Connected To', this.connectedTo);
+
   }
 }

@@ -7,16 +7,18 @@ import {
   CdkDropList,
 } from '@angular/cdk/drag-drop';
 import { ListType } from '../list/list.model';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-taskcard',
-  imports: [CdkDrag, CdkDropList],
+  imports: [CdkDrag, CdkDropList, CommonModule],
   templateUrl: './taskcard.component.html',
   styleUrl: './taskcard.component.css'
 })
 export class TaskcardComponent implements OnInit {
 
-  @Input() taskList: ListType = { todo: [], doing: [], done: [] };
+ @Input() cardTitle: string = '';
+
 
   drop(event: CdkDragDrop<string[]>) {
     if (event.previousContainer === event.container) {
@@ -32,7 +34,6 @@ export class TaskcardComponent implements OnInit {
   }
   
   ngOnInit() {
-    console.log('Tasklist in Child', this.taskList);
+    console.log('Card Title', this.cardTitle);
   }
-
 }
