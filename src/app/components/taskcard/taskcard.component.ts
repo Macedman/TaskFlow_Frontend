@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-taskcard',
-  imports: [CdkDrag, CdkDropList, CommonModule],
+  imports: [CdkDrag, CommonModule],
   templateUrl: './taskcard.component.html',
   styleUrl: './taskcard.component.css'
 })

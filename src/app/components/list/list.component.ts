@@ -6,7 +6,7 @@ import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-list',
-  imports: [TaskcardComponent, CommonModule, CdkDropList, CdkDrag],
+  imports: [TaskcardComponent, CommonModule, CdkDropList],
   templateUrl: './list.component.html',
   styleUrl: './list.component.css'
 })

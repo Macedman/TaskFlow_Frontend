@@ -10,10 +10,12 @@
     --secondary-text-clr: #b0b3c1;
 }
 
-* {
+@layer base {
+  *, *::before, *::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+  }
 }
 
 html {
