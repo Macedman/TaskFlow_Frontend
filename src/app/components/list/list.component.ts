@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { TaskcardComponent } from '../taskcard/taskcard.component';
 import { CommonModule } from '@angular/common';
-import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
+import { CdkDropListGroup, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 
 
 @Component({
@@ -13,7 +13,6 @@ import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 export class ListComponent implements OnInit {
   @Input() listTitle: string = '';
   @Input() cards: string[] = [];
-  @Input() connectedTo: string[] = [];
 
   @Output() dropped = new EventEmitter<CdkDragDrop<string[]>>();
 
@@ -25,7 +24,5 @@ export class ListComponent implements OnInit {
   ngOnInit() {
     console.log('List Title', this.listTitle);
     console.log('Cards', this.cards);
-    console.log('Connected To', this.connectedTo);
-
   }
 }

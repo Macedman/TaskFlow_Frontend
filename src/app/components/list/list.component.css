@@ -1,0 +1,6 @@
+.example-list {
+  min-height: 60px;
+  background: #f1f2f4;
+  overflow: hidden;
+  display: block;
+}

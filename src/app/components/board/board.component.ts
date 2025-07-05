@@ -3,12 +3,12 @@ import { ListComponent } from '../list/list.component';
 import { NavbarComponent } from '../navbar/navbar.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { ListType } from '../list/list.model';
-import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDropListGroup, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { AddListComponent } from '../add-list/add-list.component';
 
 @Component({
   selector: 'app-board',
-  imports: [ListComponent, NavbarComponent, SidebarComponent, AddListComponent],
+  imports: [ListComponent, NavbarComponent, SidebarComponent, AddListComponent, CdkDropListGroup],
   templateUrl: './board.component.html',
   styleUrl: './board.component.css'
 })

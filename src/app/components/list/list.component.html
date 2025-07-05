@@ -1,12 +1,10 @@
-<div class="bg-red-900 p-4 rounded w-80">
-  <h2 class="text-lg font-bold capitalize mb-2">{{ listTitle }}</h2>
+<div class="bg-[#f1f2f4] p-4 rounded w-80">
+  <h2 class="text-lg font-bold capitalize mb-2 text-black">{{ listTitle }}</h2>
   
   <div
     cdkDropList
-    [id]="listTitle"
     [cdkDropListData]="cards"
-    [cdkDropListConnectedTo]="connectedTo"
-    class="example-list bg-white p-2 rounded min-h-[100px]"
+    class="example-list"
     (cdkDropListDropped)="onDrop($event)"
   >
     @for (card of cards; track card) {
@@ -15,4 +13,4 @@
       <div class="text-gray-400 italic">No items</div>
     }
   </div>
-</div>
+  </div>
