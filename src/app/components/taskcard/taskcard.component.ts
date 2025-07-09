@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, inject, Input, OnInit } from '@angular/core';
 import {
   CdkDragDrop,
   moveItemInArray,
@@ -6,8 +6,10 @@ import {
   CdkDrag,
   CdkDropList,
 } from '@angular/cdk/drag-drop';
-import { ListType } from '../list/list.model';
+
+import { Dialog } from '@angular/cdk/dialog';
 import { CommonModule } from '@angular/common';
+import { EditTaskcardModalComponent } from '../edit-taskcard-modal/edit-taskcard-modal.component';
 
 @Component({
   selector: 'app-taskcard',
@@ -16,6 +18,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './taskcard.component.css'
 })
 export class TaskcardComponent implements OnInit {
+  dialog = inject(Dialog);
 
  @Input() cardTitle: string = '';
 
@@ -35,5 +38,16 @@ export class TaskcardComponent implements OnInit {
   
   ngOnInit() {
     console.log('Card Title', this.cardTitle);
+  }
+
+  openDialog() {
+    const dialogRef = this.dialog.open<string>(EditTaskcardModalComponent, {
+      height: 'auto',
+      width: 'auto',
+    });
+
+    dialogRef.closed.subscribe(result => {
+      console.log('The dialog was closed', result);
+    });
   }
 }
