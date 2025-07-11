@@ -2,7 +2,9 @@
   <header class="border-b-[1px]">
     <div class="flex justify-between items-center min-h-[56px]">
       <div>
-        <button class="bg-[#DCDFE4] text-[#091E42] p-[0.25rem] rounded hover:bg-[#B3B9C4] font-[600] text-[14px]">
+        <button
+          class="bg-[#DCDFE4] text-[#091E42] p-[0.25rem] rounded hover:bg-[#B3B9C4] font-[600] text-[14px]"
+        >
           Todo
           <svg
             class="inline"
@@ -75,14 +77,27 @@
     </div>
   </header>
   <div class="flex">
-    <main class="grid grid-cols-[1fr] grid-rows-[0fr_1fr]">
-      <section>
-        <div>
-         <button class="bg-white border-[1px] border-black p-[15px] rounded-[50%]"></button>
+    <main
+      class="grid grid-cols-[1fr] grid-rows-[0fr_1fr] w-[100%] overflow-y-auto flex-auto"
+    >
+      <section class="p-[24px_20px_16px]">
+        <div class="flex items-center justify-center h-[72px] gap-3">
+          <button
+            class="bg-white border-1 border-black rounded-full w-4 h-4 flex-shrink-0 self-start mt-[6px]"
+          ></button>
+
+          <textarea
+            class="text-[#172B4D] w-full text-[28px] resize-none p-[4px_8px] h-full"
+            rows="1"
+            placeholder="Enter Something"
+            >{{ title }}</textarea
+          >
         </div>
       </section>
       <section class="bg-yellow-400 min-w-[444px] max-w-[640px]"></section>
     </main>
-    <aside class="bg-red-400 p-[100px]"></aside>
+    <aside
+      class="bg-[#F7F8F9] w-[444px] h-auto border-l-1 border-[#091E4224] flex-[1_0_auto]"
+    ></aside>
   </div>
 </div>

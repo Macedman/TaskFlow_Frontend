@@ -7,5 +7,6 @@ import { Component } from '@angular/core';
   styleUrl: './edit-taskcard-modal.component.css'
 })
 export class EditTaskcardModalComponent {
+  title : string = 'Set up Angular and Backend, Auth Systems';  
 
 }
