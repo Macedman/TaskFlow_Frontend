@@ -1,6 +1,6 @@
 <div class="w-[1084px] h-[400px]">
   <header class="border-b-[1px]">
-    <div class="flex justify-between items-center min-h-[56px]">
+    <div class="flex justify-between items-center min-h-[56px] px-5">
       <div>
         <button
           class="bg-[#DCDFE4] text-[#091E42] p-[0.25rem] rounded hover:bg-[#B3B9C4] font-[600] text-[14px]"
@@ -80,7 +80,7 @@
     <main
       class="grid grid-cols-[1fr] grid-rows-[0fr_1fr] w-[100%] overflow-y-auto flex-auto"
     >
-     <!-- 1st Section -->
+      <!-- 1st Section -->
       <section class="p-[24px_20px_16px]">
         <div class="flex items-center justify-center h-[72px] gap-3">
           <button
@@ -88,7 +88,7 @@
           ></button>
 
           <textarea
-            class="text-[#172B4D] w-full text-[28px] resize-none p-[4px_8px] h-full"
+            class="text-[#172B4D] font-[600] w-full text-[28px] resize-none p-[4px_8px] h-full"
             rows="1"
             placeholder="Enter Something"
             >{{ title }}</textarea
@@ -188,9 +188,12 @@
           </div>
         </section>
         <!-- 2nd Section -->
-        <section class="grid grid-cols-[0fr_1fr_0fr] grid-rows-[0fr_1fr] w-full gap-y-[8px]">
-          <div class="bg-amber-300">
+        <section
+          class="grid grid-cols-[0fr_1fr_0fr] grid-rows-[0fr_1fr] w-full gap-y-[8px]"
+        >
+          <div class="mr-3">
             <svg
+              class="w-[20px] h-[24px]"
               xmlns="http://www.w3.org/2000/svg"
               height="24px"
               viewBox="0 -960 960 960"
@@ -203,19 +206,31 @@
             </svg>
           </div>
 
-          <div class="bg-red-400">
-            <h2 class="text-[20px] text-[#091E42]">Description</h2>
+          <div class="">
+            <h3 class="text-[14px] text-[#091E42] font-[600]">Description</h3>
           </div>
           <div class="">
-            <button class="rounded border-1 border-[#091E4224] p-[0.25rem_0.50rem] h-full">Edit</button>
+            <button
+              class="rounded bg-[#091E420F] text-[#172B4D] text-[14px] font-[500] p-[0.25rem_0.50rem] hover:bg-[#091E4224] h-full"
+            >
+              Edit
+            </button>
           </div>
-          <div class="bg-green-400">
-            <p>
+          <div class="col-start-2">
+            <p class="text-[#172B4D] text-[14px] font-[400]">
               Use JWT: create Auth Guards
             </p>
           </div>
         </section>
-        <section></section>
+        <!-- 3rd Section -->
+        <section>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </section>
       </div>
     </main>
     <aside
