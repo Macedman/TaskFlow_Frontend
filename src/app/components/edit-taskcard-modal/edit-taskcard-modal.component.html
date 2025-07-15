@@ -1,4 +1,4 @@
-<div class="w-[1084px] h-[400px]">
+<div class="w-[1084px] h-auto">
   <header class="border-b-[1px]">
     <div class="flex justify-between items-center min-h-[56px] px-5">
       <div>
@@ -223,13 +223,47 @@
           </div>
         </section>
         <!-- 3rd Section -->
-        <section>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
+        <section class="grid grid-cols-[0fr_1fr_0fr] grid-rows-[0fr_1fr] w-full gap-y-[8px]">
+          <div class="mr-3">
+            <svg
+              class="w-[20px] h-[24px]"
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#091E42"
+            >
+              <path
+                d="M330-240q-104 0-177-73T80-490q0-104 73-177t177-73h370q75 0 127.5 52.5T880-560q0 75-52.5 127.5T700-380H350q-46 0-78-32t-32-78q0-46 32-78t78-32h370v80H350q-13 0-21.5 8.5T320-490q0 13 8.5 21.5T350-460h350q42-1 71-29.5t29-70.5q0-42-29-71t-71-29H330q-71-1-120.5 49T160-490q0 70 49.5 119T330-320h390v80H330Z"
+              />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-[14px] text-[#091E42] font-[600]">Attachments</h3>
+          </div>
+          <div>
+            <button
+              class="rounded bg-[#091E420F] text-[#172B4D] text-[14px] font-[500] p-[0.25rem_0.50rem] hover:bg-[#091E4224] h-full"
+            >
+              Edit
+            </button>
+          </div>
+          <div class="col-start-2">
+            <h3 class="text-[14px] text-[#091E42] font-[600]">Files</h3>
+            <li>
+              <ul>
+                <div class="flex">
+                  <div class="min-w-[64px] h-[48px] text-[#44546F] uppercase text-[14px] bg-[#091E420F] rounded shadow-(--my-shadow) cursor-pointer flex items-center justify-center overflow-hidden">
+                    <a href="" class="text-[14px] text-[#172B4D]">
+                      <span>docx</span>
+                    </a>
+                  </div>
+                  <div></div>
+                  <div></div>
+                </div>
+              </ul>
+            </li>
+          </div>
         </section>
       </div>
     </main>

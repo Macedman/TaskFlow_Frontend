@@ -8,6 +8,7 @@
     --text-clr: #e6e6ef;
     --accent-clr: #5e63ff;
     --secondary-text-clr: #b0b3c1;
+    --my-shadow: 0px 1px 1px #091E4240, 0px 0px 1px #091E424F;
 }
 
 @layer base {
