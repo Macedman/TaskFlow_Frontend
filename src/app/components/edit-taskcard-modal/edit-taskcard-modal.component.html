@@ -223,7 +223,9 @@
           </div>
         </section>
         <!-- 3rd Section -->
-        <section class="grid grid-cols-[0fr_1fr_0fr] grid-rows-[0fr_1fr] w-full gap-y-[8px]">
+        <section
+          class="grid grid-cols-[0fr_1fr_0fr] grid-rows-[0fr_1fr] w-full gap-y-[8px]"
+        >
           <div class="mr-3">
             <svg
               class="w-[20px] h-[24px]"
@@ -250,25 +252,116 @@
           </div>
           <div class="col-start-2">
             <h3 class="text-[14px] text-[#091E42] font-[600]">Files</h3>
-            <li>
+            <li class="flex">
               <ul>
-                <div class="flex">
-                  <div class="min-w-[64px] h-[48px] text-[#44546F] uppercase text-[14px] bg-[#091E420F] rounded shadow-(--my-shadow) cursor-pointer flex items-center justify-center overflow-hidden">
-                    <a href="" class="text-[14px] text-[#172B4D]">
+                <div class="flex gap-x-3">
+                  <div
+                    class="min-w-[64px] h-[48px] text-[#44546F] uppercase text-[14px] bg-[#091E420F] rounded shadow-(--my-shadow) cursor-pointer flex items-center justify-center overflow-hidden"
+                  >
+                    <a href="" class="text-[14px] text-[#172B4D] font-[600]">
                       <span>docx</span>
                     </a>
                   </div>
-                  <div></div>
-                  <div></div>
+                  <div class="cursor-grab">
+                    <div>
+                      <span class="text-[14px] text-[#172B4D] font-[600]">
+                        Project Idea.docx
+                      </span>
+                    </div>
+                    <p>
+                      <span class="text-[12px] text-[#44546F]">
+                        Added July 15, 2025, 10:45 PM
+                      </span>
+                    </p>
+                  </div>
                 </div>
               </ul>
             </li>
+          </div>
+          <div class="flex items-center gap-x-3 mt-[14px]">
+            <a href="https://youtube.com">
+              <span
+                ><svg
+                  class="size-[16px]"
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="24px"
+                  viewBox="0 -960 960 960"
+                  width="24px"
+                  fill="#091E42"
+                >
+                  <path
+                    d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"
+                  /></svg
+              ></span>
+            </a>
+            <button>
+              <span>
+                <svg
+                  class="size-[16px]"
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="24px"
+                  viewBox="0 -960 960 960"
+                  width="24px"
+                  fill="#091E42"
+                >
+                  <path
+                    d="M240-400q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm240 0q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm240 0q-33 0-56.5-23.5T640-480q0-33 23.5-56.5T720-560q33 0 56.5 23.5T800-480q0 33-23.5 56.5T720-400Z"
+                  />
+                </svg>
+              </span>
+            </button>
           </div>
         </section>
       </div>
     </main>
     <aside
       class="bg-[#F7F8F9] w-[444px] h-auto border-l-1 border-[#091E4224] flex-[1_0_auto]"
-    ></aside>
+    >
+      <div>
+        <section
+          class="grid grid-cols-[0fr_1fr] grid-rows-[0fr_1fr] gap-x-3 text-[#172B4D] p-5"
+        >
+          <div class="flex items-center">
+            <svg
+              class=""
+              xmlns="http://www.w3.org/2000/svg"
+              height="20px"
+              viewBox="0 -960 960 960"
+              width="20px"
+              fill="#091E42"
+            >
+              <path
+                d="M240-400h320v-80H240v80Zm0-120h480v-80H240v80Zm0-120h480v-80H240v80ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z"
+              />
+            </svg>
+          </div>
+          <hgroup class="flex justify-between items-center">
+            <h3 class="text-[14px] font-[600]">Comments and activity</h3>
+            <button class="bg-[#091E4224] rounded font-[500] p-[6px_12px] cursor-pointer">Show Details</button>
+          </hgroup>
+          <div class="grid col-span-full">
+            <div class="bg-white flex rounded-xl h-[36px] w-full text-[#626F86] items-center p-[6px_12px] cursor-pointer font-[500] text-[14px]">
+              <button>Write a Comment...</button>
+            </div>
+          </div>
+
+          <ul class="grid col-span-full">
+            <li class="flex bg-red-300">
+              <div>
+                <button>EM</button>
+              </div>
+              <div>
+                  <span>Eugene Clint Maceda</span>
+                  <span class="">Added this card to To do</span>
+                  <br />
+                  <span>
+                    <a href="">Apr 17, 2025, 12:15 AM </a>
+                  </span>
+              </div> 
+            </li>
+          </ul>
+        </section>
+      </div>
+    </aside>
   </div>
 </div>

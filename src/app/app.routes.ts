@@ -18,7 +18,8 @@ export const routes: Routes = [
     { 
         path: 'board',
         component: BoardComponent,
-        canActivate: [authGuard]
+        canActivate: [authGuard],
+        title: 'Task Board'
     },
     //  { 
     //     path: 'taskcard',
