@@ -1,3 +1,49 @@
-<button class="text-[#44546f] mx-3 w-4/5 text-left h-10 rounded hover:bg-[#091e4224] hover:text-black">
+<div>
+  @if (isAddingCard()) {
+  <div class="flex flex-col">
+    <div class="flex justify-center items-center">
+      <textarea
+        #myTextArea
+        class="w-full min-h-[36px] bg-white p-[8px_12px] text-[#172B4D] placeholder:text-gray-400 shadow-(--my-shadow) overflow-hidden resize-none rounded-lg"
+        type="text"
+        aria-label="Add new list"
+        placeholder="Enter a title or paste a link"
+      ></textarea>
+    </div>
+
+    <div class="mt-2 flex gap-2">
+      <button
+        aria-label="Add new card"
+        class="bg-[#0C66E4] text-[14px] rounded font-[500] p-[6px_12px] cursor-pointer text-white"
+        (click)="confirmAddCard()"
+      >
+        Add list
+      </button>
+      <button
+        aria-label="Cancel adding new card"
+        class=""
+        (click)="cancelAddCard()"
+      >
+       <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="24px"
+          viewBox="0 -960 960 960"
+          width="24px"
+          fill="#091E42"
+        >
+          <path
+            d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+  } @else {
+  <button
+    class="text-[#44546F] mx-3 w-4/5 font-[500] p-[6px_12px_6px_8px] text-left rounded hover:bg-[#091e4224] hover:text-[#172B4D]"
+    (click)="addCard()"
+  >
     <span class="mx-4 text-[20px]">+</span> Add Card
-</button>
+  </button>
+  }
+</div>

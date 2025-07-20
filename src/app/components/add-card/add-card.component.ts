@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 
 @Component({
   selector: 'app-add-card',
@@ -8,4 +8,21 @@ import { Component } from '@angular/core';
 })
 export class AddCardComponent {
 
+  isAddingCard = signal(false);
+
+
+   addCard() {
+    this.isAddingCard.set(true);
+    console.log(this.isAddingCard);
+  }
+
+  cancelAddCard() {
+    this.isAddingCard.set(false);
+    console.log(this.isAddingCard);
+  }
+
+  confirmAddCard() {
+    console.log(this.isAddingCard);
+  }
 }
+

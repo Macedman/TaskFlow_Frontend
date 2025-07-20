@@ -1,31 +1,41 @@
 <div>
   @if (isAdding()) {
-  <div class="flex flex-col bg-white w-xs border-2 border-green-500">
+  <div class="flex flex-col bg-white w-[272px] rounded-xl">
     <div class="flex justify-center items-center mt-3">
       <textarea
         #myTextArea
-        class="w-9/10 h-12 border-2 text-black border-gray-500 focus:border-blue-400 outline-none"
+        class="mx-2 w-full h-[32px] text-[#172B4D] outline-none resize-none rounded p-[6px_12px] overflow-hidden shadow-[inset_0_0_0_1px_#8590A2] font-[600] min-h-[20px] max-h-[256px] placeholder:text-gray-400"
         type="text"
         aria-label="Add new list"
-        placeholder="Enter list name"
+        placeholder="Enter list name..."
         [formControl]="newList"
       ></textarea>
     </div>
 
-    <div class="my-2 mx-4">
+    <div class="my-2 mx-3 flex gap-2">
       <button
         aria-label="Add new list"
-        class="w-2/5 h-9 bg-blue-500 text-[14px]"
+        class="bg-[#0C66E4] text-[14px] rounded font-[500] p-[6px_12px] cursor-pointer text-white"
         (click)="confirmAddList()"
       >
-        Add New list
+        Add list
       </button>
       <button
         aria-label="Cancel adding new list"
-        class="w-1/5 h-9 text-2xl text-black"
+        class=""
         (click)="cancelAddList()"
       >
-        X
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="24px"
+          viewBox="0 -960 960 960"
+          width="24px"
+          fill="#091E42"
+        >
+          <path
+            d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
+          />
+        </svg>
       </button>
     </div>
   </div>
@@ -33,9 +43,9 @@
   <button
     type="button"
     (click)="addList()"
-    class="w-xs h-12 text-lg bg-white text-gray-800 font-semibold rounded-xl shadow-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
+    class="w-[272px] text-[14px] bg-[#ffffff3d] text-white font-[500] rounded-xl flex items-center justify-start p-[12px] hover:bg-[#FFFFFF33]"
   >
-    + Add New Task
+    + Add another list
   </button>
   }
 </div>
