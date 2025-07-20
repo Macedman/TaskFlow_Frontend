@@ -6,8 +6,9 @@
         #myTextArea
         class="w-full min-h-[36px] bg-white p-[8px_12px] text-[#172B4D] placeholder:text-gray-400 shadow-(--my-shadow) overflow-hidden resize-none rounded-lg"
         type="text"
-        aria-label="Add new list"
+        aria-label="Add new card"
         placeholder="Enter a title or paste a link"
+        [formControl]="newCard"
       ></textarea>
     </div>
 
@@ -17,7 +18,7 @@
         class="bg-[#0C66E4] text-[14px] rounded font-[500] p-[6px_12px] cursor-pointer text-white"
         (click)="confirmAddCard()"
       >
-        Add list
+        Add card
       </button>
       <button
         aria-label="Cancel adding new card"

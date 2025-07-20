@@ -12,6 +12,7 @@ export class AddListComponent {
 
   newList = new FormControl('', Validators.required);
   //this textarea is conditionally rendered, used viewchild to make sure it is available for focus
+  //the purpose of this viewchild is to get the textarea element and focus on it when Add list button is clicked
   readonly textarea = viewChild<ElementRef<HTMLTextAreaElement>>('myTextArea');
 
   constructor() {}
