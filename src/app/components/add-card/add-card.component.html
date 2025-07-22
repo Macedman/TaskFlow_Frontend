@@ -1,9 +1,9 @@
-<div>
+<div #myAddCardDiv>
   @if (isAddingCard()) {
   <div class="flex flex-col">
     <div class="flex justify-center items-center">
       <textarea
-        #myTextArea
+        #myAddCardTextArea
         class="w-full min-h-[36px] bg-white p-[8px_12px] text-[#172B4D] placeholder:text-gray-400 shadow-(--my-shadow) overflow-hidden resize-none rounded-lg"
         type="text"
         aria-label="Add new card"
