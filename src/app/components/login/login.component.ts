@@ -24,6 +24,8 @@ export class LoginComponent {
       console.log(response);
       //save the token to local storage
       localStorage.setItem('Bearer ', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      console.log("User logged in: ", response.user);
       this.router.navigate(['/board']);
     }, (error) => {
       console.log("Error logging in: ", error);

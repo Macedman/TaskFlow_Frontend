@@ -10,8 +10,6 @@ import { environment } from '../../../environments/environment';
 })
 export class LoginService {
 
-  private apiUrl = 'http://localhost:5001/api';
-
   constructor(private http: HttpClient, private router: Router) { }
 
   login(email: string, password: string): Observable<any> {
