@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { ListComponent } from '../list/list.component';
 import { NavbarComponent } from '../navbar/navbar.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
-import { ListType } from '../list/list.model';
+import { ListType } from '../../models/list.model';
 import { CdkDragDrop, CdkDropListGroup, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { AddListComponent } from '../add-list/add-list.component';
+import { BoardsService } from '../../services/boards.service';
 
 @Component({
   selector: 'app-board',
@@ -13,13 +14,9 @@ import { AddListComponent } from '../add-list/add-list.component';
   styleUrl: './board.component.css'
 })
 export class BoardComponent implements OnInit {
+  constructor(private boardService: BoardsService) {}
 
-    taskList: ListType = {
-    todo: ['Get to work', 'Pick up groceries', 'Go home', 'Fall asleep'],
-    doing: ['Backend', 'Frontend', 'Database', 'Play Dota'],
-    done: ['Get up', 'Brush teeth', 'Take a shower', 'Check e-mail', 'Walk dog']
-  };
-
+  taskList: ListType = {};
   keys: string[] = [];
   connectedTo: string[] = [];
 
@@ -43,7 +40,11 @@ export class BoardComponent implements OnInit {
   }
 
   ngOnInit() {
-  this.keys = Object.keys(this.taskList);
+  this.boardService.getTasks().subscribe((response) => {
+  this.keys = Object.keys(response);
+  this.taskList = response;
+  console.log('Task List:', this.taskList);
+})
 }
 
 }
