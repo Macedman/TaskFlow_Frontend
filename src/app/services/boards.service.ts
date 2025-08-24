@@ -12,7 +12,7 @@ export class BoardsService {
   constructor(private http: HttpClient) { }
 
   //TODO: Add payload for user
-  getTasks(): Observable<ListType> {
-    return this.http.post<ListType>(`${environment.apiUrl}/api/getTasks`, {});
+  getTasks(userId: string): Observable<ListType> {
+    return this.http.post<ListType>(`${environment.apiUrl}/api/getTasks`, { userId  });
   }
 }

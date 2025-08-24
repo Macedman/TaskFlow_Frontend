@@ -40,7 +40,12 @@ export class BoardComponent implements OnInit {
   }
 
   ngOnInit() {
-  this.boardService.getTasks().subscribe((response) => {
+  // pass the userId as parameters for fetching tasks
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userId = user.id;
+
+  // fetch tasks
+  this.boardService.getTasks(userId).subscribe((response) => {
   this.keys = Object.keys(response);
   this.taskList = response;
   console.log('Task List:', this.taskList);
