@@ -10,6 +10,7 @@ import {
 import { Dialog } from '@angular/cdk/dialog';
 import { CommonModule } from '@angular/common';
 import { EditTaskcardModalComponent } from '../edit-taskcard-modal/edit-taskcard-modal.component';
+import { Card } from '../../models/card-details.model';
 
 @Component({
   selector: 'app-taskcard',
@@ -20,7 +21,8 @@ import { EditTaskcardModalComponent } from '../edit-taskcard-modal/edit-taskcard
 export class TaskcardComponent implements OnInit {
   dialog = inject(Dialog);
 
- @Input() cardTitle: string = '';
+ @Input() card: Card = { card_id: '', card_title: '' };
+ cardTitle: string = '';
 
 
   drop(event: CdkDragDrop<string[]>) {
@@ -37,7 +39,9 @@ export class TaskcardComponent implements OnInit {
   }
   
   ngOnInit() {
-    console.log('Card Title', this.cardTitle);
+    console.log('Card Title', this.card.card_title);
+    this.cardTitle = this.card.card_title;
+    console.log('Card', this.card);
   }
 
   openDialog() {

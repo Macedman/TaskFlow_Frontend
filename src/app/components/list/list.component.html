@@ -3,12 +3,12 @@
   
   <div
     cdkDropList
-    [cdkDropListData]="cards"
+    [cdkDropListData]="cardTitles"
     class="example-list"
     (cdkDropListDropped)="onDrop($event)"
   >
     @for (card of cards; track card) {
-      <app-taskcard [cardTitle]="card"></app-taskcard>
+      <app-taskcard [card]="card"></app-taskcard>
     } @empty {
       <div class="text-gray-400 italic">No items</div>
     }

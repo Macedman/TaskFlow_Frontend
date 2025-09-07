@@ -15,4 +15,8 @@ export class BoardsService {
   getTasks(userId: string): Observable<ListType> {
     return this.http.post<ListType>(`${environment.apiUrl}/api/getTasks`, { userId  });
   }
+
+  getTaskDetails(cardId: string):Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/api/getTaskDetails`, {cardId});
+  }
 }
