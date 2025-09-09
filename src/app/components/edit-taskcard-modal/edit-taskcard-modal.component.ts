@@ -19,7 +19,6 @@ export class EditTaskcardModalComponent implements OnInit {
   ngOnInit() {
     this.cardId = '1'; // Example cardId, replace with actual value as needed
     this.boardsService.getTaskDetails('1').subscribe((response) => {
-      console.log('Task Details:', response);
     })
   }
 }

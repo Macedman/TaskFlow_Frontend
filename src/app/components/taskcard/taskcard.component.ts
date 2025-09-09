@@ -24,24 +24,11 @@ export class TaskcardComponent implements OnInit {
  @Input() card: Card = { card_id: '', card_title: '' };
  cardTitle: string = '';
 
-
-  drop(event: CdkDragDrop<string[]>) {
-    if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-    } else {
-      transferArrayItem(
-        event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex,
-      );
-    }
-  }
   
   ngOnInit() {
-    console.log('Card Title', this.card.card_title);
     this.cardTitle = this.card.card_title;
-    console.log('Card', this.card);
+    console.log('Card Title:', this.cardTitle);
+    console.log('Card Details:', this.card);
   }
 
   openDialog() {

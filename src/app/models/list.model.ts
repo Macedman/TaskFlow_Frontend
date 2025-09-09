@@ -1,5 +1,5 @@
 export interface ListType {
-    [key: string]: string[];
+    [key: string]: Card[];
 }
 
 export interface Card {
