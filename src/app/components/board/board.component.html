@@ -1,18 +1,19 @@
 <div class="app-layout">
   <app-navbar class="navbar"></app-navbar>
-  <app-sidebar class="sidebar"></app-sidebar>
+  <!-- <app-sidebar class="sidebar"></app-sidebar> -->
   <div class="main mt-3 ml-3">
     <div class="flex flex-row gap-5">
       <div class="flex flex-row gap-5" cdkDropListGroup>
-        @for (key of keys; track key) {
+        @for (list of lists; track list.listId) {
         <app-list
-          [listTitle]="key"
-          [cards]="taskList[key]"
+          [listTitle]="list.listName"
+          [cards]="list.cards"
           (dropped)="onListDrop($event)"
         ></app-list>
         }
       </div>
       <app-add-list></app-add-list>
+      <app-bottom-navigation class="bottom-navigation"></app-bottom-navigation>
     </div>
   </div>
 </div>

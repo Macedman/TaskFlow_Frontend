@@ -1,8 +1,7 @@
-export interface ListType {
-    [key: string]: Card[];
-}
+﻿import { Card } from './card-details.model';
 
-export interface Card {
-    card_id: string;
-    card_title: string;
+export interface ListType {
+    listId: string;
+    listName: string;
+    cards: Card[];
 }

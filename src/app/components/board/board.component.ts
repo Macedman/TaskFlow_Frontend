@@ -2,27 +2,29 @@ import { Component, OnInit } from '@angular/core';
 import { ListComponent } from '../list/list.component';
 import { NavbarComponent } from '../navbar/navbar.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
-import { Card, ListType } from '../../models/list.model';
+import { ListType } from '../../models/list.model';
 import { CdkDragDrop, CdkDropListGroup, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { AddListComponent } from '../add-list/add-list.component';
 import { BoardsService } from '../../services/boards.service';
+import { BottomNavigationComponent } from '../bottom-navigation/bottom-navigation.component';
+import { Board } from '../../models/boards.model';
+import { ActivatedRoute } from '@angular/router';
+import { Card } from '../../models/card-details.model';
 
 @Component({
   selector: 'app-board',
-  imports: [ListComponent, NavbarComponent, SidebarComponent, AddListComponent, CdkDropListGroup],
+  imports: [ListComponent, NavbarComponent, AddListComponent, CdkDropListGroup, BottomNavigationComponent],
   templateUrl: './board.component.html',
   styleUrl: './board.component.css'
 })
 export class BoardComponent implements OnInit {
-  constructor(private boardService: BoardsService) {}
+  constructor(private boardService: BoardsService,
+              private route: ActivatedRoute
+  ) {}
 
-  taskList: ListType = {};
-  keys: string[] = [];
-  connectedTo: string[] = [];
-
-  public getConnectedTo(key: string): string[] {
-    return this.keys.filter(k => k !== key);
-  }
+  lists: ListType[] = [];
+  user = JSON.parse(localStorage.getItem('user') || '{}');
+  userId = this.user.id;
 
   onListDrop(event: CdkDragDrop<Card[]>) {
     if (event.previousContainer === event.container) {
@@ -38,16 +40,25 @@ export class BoardComponent implements OnInit {
   }
 
   ngOnInit() {
-  // pass the userId as parameters for fetching tasks
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const userId = user.id;
+  this.getTasks();
+}
 
+getTasks() {
   // fetch tasks
-  this.boardService.getTasks(userId).subscribe((response) => {
-  this.keys = Object.keys(response);
-  this.taskList = response;
-  console.log('Task List:', this.taskList);
+  //Add board id to the getTasks method in scho wanksfish is not en the boards service
+  this.route.paramMap.subscribe(params => {
+  const boardId = params.get('boardId');
+
+  console.log('Board ID from route:', boardId);
+
+  if (boardId) {
+  this.boardService.getTasks(this.userId, boardId).subscribe((response) => {
+  this.lists = response;
+  console.log('Fetched lists:', this.lists);
 })
+  }
+});
+  
 }
 
 }
