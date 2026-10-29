@@ -31,7 +31,7 @@ export class BottomNavigationComponent implements OnInit {
     if (!user.id) return;
 
     this.isLoading = true;
-    this.boardsService.getBoards(user.id).subscribe({
+    this.boardsService.getBoards().subscribe({
       next: (boards) => {
         this.boards = boards || [];
         this.isLoading = false;

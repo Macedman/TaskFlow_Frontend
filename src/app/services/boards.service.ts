@@ -12,16 +12,16 @@ export class BoardsService {
 
   constructor(private http: HttpClient) { }
 
-  //TODO: Add payload for user
-  getTasks(userId: string, boardId: string): Observable<ListType[]> {
-    return this.http.post<ListType[]>(`${environment.apiUrl}/api/getTasks`, { userId, boardId });
+  // The API identifies the user from the JWT (added by authInterceptor), not from the body.
+  getTasks(boardId: string): Observable<ListType[]> {
+    return this.http.post<ListType[]>(`${environment.apiUrl}/api/getTasks`, { boardId });
   }
 
   getTaskDetails(cardId: string):Observable<any> {
     return this.http.post<any>(`${environment.apiUrl}/api/getTaskDetails`, {cardId});
   }
 
-  getBoards(userId: string): Observable<Board[]> {
-    return this.http.post<Board[]>(`${environment.apiUrl}/api/getBoards`, { userId });
+  getBoards(): Observable<Board[]> {
+    return this.http.post<Board[]>(`${environment.apiUrl}/api/getBoards`, {});
   }
 }

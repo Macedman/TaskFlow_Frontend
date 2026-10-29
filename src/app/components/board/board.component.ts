@@ -23,8 +23,6 @@ export class BoardComponent implements OnInit {
   ) {}
 
   lists: ListType[] = [];
-  user = JSON.parse(localStorage.getItem('user') || '{}');
-  userId = this.user.id;
 
   onListDrop(event: CdkDragDrop<Card[]>) {
     if (event.previousContainer === event.container) {
@@ -52,7 +50,7 @@ getTasks() {
   console.log('Board ID from route:', boardId);
 
   if (boardId) {
-  this.boardService.getTasks(this.userId, boardId).subscribe((response) => {
+  this.boardService.getTasks(boardId).subscribe((response) => {
   this.lists = response;
   console.log('Fetched lists:', this.lists);
 })
