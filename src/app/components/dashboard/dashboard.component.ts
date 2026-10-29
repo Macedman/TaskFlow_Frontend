@@ -12,7 +12,6 @@ import { Router } from '@angular/router';
 export class DashboardComponent {
   boards: Board[] = [];
   user = JSON.parse(localStorage.getItem('user') || '{}'); //transfer this to a service
-  userId = this.user.id;
   userName = this.user.full_name;
   
 
@@ -28,7 +27,7 @@ export class DashboardComponent {
   
 //Transfer this to dashboard component, this is not the right place to get boards
 getBoards() {
-  this.boardService.getBoards(this.userId).subscribe((response) => {
+  this.boardService.getBoards().subscribe((response) => {
     console.log('Boards:', response);
     this.boards = response;
   });

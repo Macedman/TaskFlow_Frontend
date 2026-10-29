@@ -10,6 +10,12 @@ import {
   Plus,
   Trash2,
   Pencil,
+  List,
+  Pin,
+  Users,
+  MoreHorizontal,
+  ChevronDown,
+  Clock,
 } from 'lucide-angular';
 
 export const Icons = {
@@ -24,4 +30,10 @@ export const Icons = {
   Plus,
   Trash2,
   Pencil,
+  List,
+  Pin,
+  Users,
+  MoreHorizontal,
+  ChevronDown,
+  Clock,
 };
