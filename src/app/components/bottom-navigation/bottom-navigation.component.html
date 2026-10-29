@@ -1,25 +1,155 @@
 <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
   <div class="flex items-center gap-1 rounded-2xl bg-white p-1 shadow-lg">
 
-    <button class="flex items-center gap-2 rounded-xl px-4 py-2 text-slate-600 hover:bg-slate-100 transition">
+    <button type="button" class="flex items-center gap-2 rounded-xl px-4 py-2 text-slate-600 hover:bg-slate-100 transition">
       <lucide-icon [img]="icons.Inbox" class="h-5 w-5"></lucide-icon>
       <span>Inbox</span>
     </button>
 
-    <button class="flex items-center gap-2 rounded-xl px-4 py-2 text-slate-600 hover:bg-slate-100 transition">
+    <button type="button" class="flex items-center gap-2 rounded-xl px-4 py-2 text-slate-600 hover:bg-slate-100 transition">
       <lucide-icon [img]="icons.Calendar" class="h-5 w-5"></lucide-icon>
       <span>Planner</span>
     </button>
 
-    <button class="flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-2 text-blue-600">
+    <button type="button" class="flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-2 text-blue-600">
       <lucide-icon [img]="icons.KanbanSquare" class="h-5 w-5"></lucide-icon>
       <span>Board</span>
     </button>
 
-    <button class="flex items-center gap-2 rounded-xl px-4 py-2 text-slate-600 hover:bg-slate-100 transition">
+    <button type="button" (click)="openPicker()" class="flex items-center gap-2 rounded-xl px-4 py-2 text-slate-600 hover:bg-slate-100 transition">
       <lucide-icon [img]="icons.ArrowRightLeft" class="h-5 w-5"></lucide-icon>
       <span>Switch boards</span>
     </button>
 
   </div>
 </div>
+
+@if (isPickerOpen) {
+  <div class="board-picker-backdrop" (click)="closePicker()">
+    <section
+      class="board-picker"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="board-picker-title"
+      (click)="$event.stopPropagation()">
+      <h2 id="board-picker-title" class="sr-only">Switch boards</h2>
+
+      <div class="board-picker-search-row">
+        <label class="board-picker-search">
+          <lucide-icon [img]="icons.Search" class="search-icon"></lucide-icon>
+          <input
+            type="search"
+            placeholder="Search your boards"
+            aria-label="Search your boards"
+            (input)="searchTerm = $any($event.target).value"
+            autofocus>
+        </label>
+
+        <div class="board-picker-tools">
+          <button
+            type="button"
+            class="picker-tool"
+            [attr.aria-label]="isListView ? 'Show boards as a grid' : 'Show boards as a list'"
+            [attr.aria-pressed]="isListView"
+            (click)="isListView = !isListView">
+            <lucide-icon [img]="icons.List" class="tool-icon"></lucide-icon>
+          </button>
+          <button
+            type="button"
+            class="picker-tool"
+            aria-label="Pin workspace"
+            [attr.aria-pressed]="isPinned"
+            [class.tool-active]="isPinned"
+            (click)="isPinned = !isPinned">
+            <lucide-icon [img]="icons.Pin" class="tool-icon"></lucide-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="board-picker-filters" aria-label="Board scope">
+        <button type="button" class="scope-tab" [class.scope-active]="activeScope === 'all'" (click)="setScope('all')">All</button>
+        <button type="button" class="scope-tab" [class.scope-active]="activeScope === 'workspace'" (click)="setScope('workspace')">Trello Workspace</button>
+      </div>
+
+      @if (isLoading) {
+        <p class="board-picker-message">Loading boards...</p>
+      } @else if (loadError) {
+        <p class="board-picker-message">Could not load boards. Close this window and try again.</p>
+      } @else {
+        <div class="board-picker-content" [class.all-scope]="activeScope === 'all'">
+          @if (activeScope === 'all') {
+            <section class="board-picker-section">
+              <h3 class="board-picker-heading">
+                <lucide-icon [img]="icons.Clock" class="heading-chevron"></lucide-icon>
+                Recent
+              </h3>
+              @if (recentBoards.length > 0) {
+                <div class="board-picker-grid" [class.board-picker-list]="isListView">
+                  @for (board of recentBoards; track board.id; let index = $index) {
+                    <button type="button" class="board-tile" (click)="openBoard(board)">
+                      <span [class]="'board-tile-cover ' + coverClass(index)" aria-hidden="true"></span>
+                      <span class="board-tile-name">{{ board.name || 'Untitled Board' }}</span>
+                    </button>
+                  }
+                </div>
+              }
+            </section>
+
+            <section class="board-picker-section">
+              <h3 class="board-picker-heading">
+                <lucide-icon [img]="icons.ChevronDown" class="heading-chevron"></lucide-icon>
+                Trello Workspace
+              </h3>
+              @if (filteredBoards.length > 0) {
+                <div class="board-picker-grid" [class.board-picker-list]="isListView">
+                  @for (board of filteredBoards; track board.id; let index = $index) {
+                    <button type="button" class="board-tile" (click)="openBoard(board)">
+                      <span [class]="'board-tile-cover ' + coverClass(index)" aria-hidden="true"></span>
+                      <span class="board-tile-name">{{ board.name || 'Untitled Board' }}</span>
+                    </button>
+                  }
+                </div>
+              } @else {
+                <p class="board-picker-message">No matching boards.</p>
+              }
+            </section>
+          } @else {
+            <section class="board-picker-section">
+              <h3 class="board-picker-heading">
+                <lucide-icon [img]="icons.ChevronDown" class="heading-chevron"></lucide-icon>
+                Your boards
+              </h3>
+              @if (filteredBoards.length > 0) {
+                <div class="board-picker-grid" [class.board-picker-list]="isListView">
+                  @for (board of filteredBoards; track board.id; let index = $index) {
+                    <button type="button" class="board-tile" (click)="openBoard(board)">
+                      <span [class]="'board-tile-cover ' + coverClass(index)" aria-hidden="true"></span>
+                      <span class="board-tile-name">{{ board.name || 'Untitled Board' }}</span>
+                    </button>
+                  }
+                  <div class="create-board-tile" aria-label="Create new board">
+                    <span>Create new<br>board</span>
+                    <small>6 remaining</small>
+                  </div>
+                </div>
+              } @else {
+                <p class="board-picker-message">No matching boards.</p>
+              }
+            </section>
+          }
+        </div>
+      }
+
+      @if (activeScope === 'workspace') {
+        <footer class="workspace-footer">
+          <span class="free-badge">FREE</span>
+          <div class="workspace-footer-items">
+            <span class="workspace-footer-item"><lucide-icon [img]="icons.Users" class="footer-icon"></lucide-icon>Members</span>
+            <span class="workspace-footer-item"><lucide-icon [img]="icons.Settings" class="footer-icon"></lucide-icon>Settings</span>
+            <span class="workspace-footer-item footer-more"><lucide-icon [img]="icons.MoreHorizontal" class="footer-icon"></lucide-icon></span>
+          </div>
+        </footer>
+      }
+    </section>
+  </div>
+}
