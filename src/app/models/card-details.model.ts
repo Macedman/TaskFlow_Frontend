@@ -18,6 +18,12 @@ export interface NewCardResponse {
   created_at: string;
 }
 
+// The fields POST /api/updateCard accepts; a field left out stays as it is.
+export interface CardChanges {
+  title?: string;
+  description?: string;
+}
+
 // Returned by POST /api/getTaskDetails. The ids are INTEGER columns, which pg returns as numbers.
 export interface CardDetailsResponse {
   card_id: number;

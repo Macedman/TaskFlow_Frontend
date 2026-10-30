@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { DatePipe } from '@angular/common';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 
 import { EditTaskcardModalComponent } from './edit-taskcard-modal.component';
 import { BoardsService } from '../../services/boards.service';
@@ -20,7 +20,7 @@ describe('EditTaskcardModalComponent', () => {
   };
 
   beforeEach(async () => {
-    boardsService = jasmine.createSpyObj<BoardsService>('BoardsService', ['getTaskDetails']);
+    boardsService = jasmine.createSpyObj<BoardsService>('BoardsService', ['getTaskDetails', 'updateCard']);
     dialogRef = jasmine.createSpyObj<DialogRef>('DialogRef', ['close']);
 
     await TestBed.configureTestingModule({
@@ -101,6 +101,202 @@ describe('EditTaskcardModalComponent', () => {
     fixture.nativeElement.querySelector('button[aria-label="Close"]').click();
 
     expect(dialogRef.close).toHaveBeenCalledTimes(1);
+  });
+
+  describe('editing the title', () => {
+    const press = (key: string) =>
+      titleBox().dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+    const type = (value: string) => {
+      titleBox().value = value;
+      titleBox().dispatchEvent(new Event('input'));
+    };
+
+    beforeEach(() => {
+      boardsService.getTaskDetails.and.returnValue(of({ ...details }));
+      fixture.detectChanges();
+      document.body.appendChild(fixture.nativeElement);
+      titleBox().focus();
+    });
+
+    afterEach(() => fixture.nativeElement.remove());
+
+    it('saves the trimmed title on Enter, sends one request and tells the board', () => {
+      boardsService.updateCard.and.returnValue(of({ card_id: 9, card_title: 'Buy oat milk', description: 'Semi-skimmed' }));
+      const changed = jasmine.createSpy('titleChanged');
+      component.titleChanged.subscribe(changed);
+
+      type('  Buy oat milk  ');
+      press('Enter');
+
+      expect(boardsService.updateCard).toHaveBeenCalledOnceWith('9', { title: 'Buy oat milk' });
+      expect(changed).toHaveBeenCalledOnceWith('Buy oat milk');
+      expect(titleBox().value).toBe('Buy oat milk');
+    });
+
+    it('saves when the title loses focus', () => {
+      boardsService.updateCard.and.returnValue(of({ card_id: 9, card_title: 'Buy oat milk', description: null }));
+
+      type('Buy oat milk');
+      titleBox().blur();
+
+      expect(boardsService.updateCard).toHaveBeenCalledOnceWith('9', { title: 'Buy oat milk' });
+    });
+
+    it('does not send a request for an unchanged title', () => {
+      titleBox().blur();
+
+      expect(boardsService.updateCard).not.toHaveBeenCalled();
+    });
+
+    it('puts the old title back for a blank title, without a request', () => {
+      type('   ');
+      titleBox().blur();
+
+      expect(boardsService.updateCard).not.toHaveBeenCalled();
+      expect(titleBox().value).toBe('Buy milk');
+    });
+
+    it('cancels on Esc without closing the dialog', () => {
+      const reachedDocument = jasmine.createSpy('reachedDocument');
+      document.addEventListener('keydown', reachedDocument);
+
+      type('Changed my mind');
+      press('Escape');
+      document.removeEventListener('keydown', reachedDocument);
+
+      expect(titleBox().value).toBe('Buy milk');
+      expect(boardsService.updateCard).not.toHaveBeenCalled();
+      // CDK closes the dialog from a document-level listener, so Esc must not get that far
+      expect(reachedDocument).not.toHaveBeenCalled();
+    });
+
+    it('puts the old title back and reports it when the save fails', () => {
+      boardsService.updateCard.and.returnValue(throwError(() => new Error('500')));
+      const changed = jasmine.createSpy('titleChanged');
+      component.titleChanged.subscribe(changed);
+
+      type('Buy oat milk');
+      titleBox().blur();
+      fixture.detectChanges();
+
+      expect(titleBox().value).toBe('Buy milk');
+      expect(changed).not.toHaveBeenCalled();
+      expect(text()).toContain("Couldn't save the title.");
+    });
+  });
+
+  describe('editing the description', () => {
+    const editor = () =>
+      fixture.nativeElement.querySelector('textarea[aria-label="Card description"]') as HTMLTextAreaElement | null;
+    const clickButton = (label: string) =>
+      (fixture.nativeElement.querySelector(`button[aria-label="${label}"]`) as HTMLButtonElement).click();
+    const type = (value: string) => {
+      editor()!.value = value;
+      editor()!.dispatchEvent(new Event('input'));
+    };
+    const start = (card: CardDetailsResponse) => {
+      boardsService.getTaskDetails.and.returnValue(of({ ...card }));
+      fixture.detectChanges();
+      component.startEditingDescription();
+      fixture.detectChanges();
+    };
+
+    it('opens the editor when the empty placeholder is focused', () => {
+      boardsService.getTaskDetails.and.returnValue(of({ ...details, description: null }));
+      fixture.detectChanges();
+
+      emptyDescription()!.dispatchEvent(new Event('focus'));
+      fixture.detectChanges();
+
+      expect(editor()?.value).toBe('');
+    });
+
+    it('opens the editor with the current text from the Edit button', () => {
+      boardsService.getTaskDetails.and.returnValue(of({ ...details }));
+      fixture.detectChanges();
+
+      clickButton('Edit description');
+      fixture.detectChanges();
+
+      expect(editor()?.value).toBe('Semi-skimmed');
+    });
+
+    it('saves a new description, shows it and closes the editor', () => {
+      boardsService.updateCard.and.returnValue(of({ card_id: 9, card_title: 'Buy milk', description: 'Whole milk' }));
+      start(details);
+
+      type('Whole milk');
+      clickButton('Save description');
+      fixture.detectChanges();
+
+      expect(boardsService.updateCard).toHaveBeenCalledOnceWith('9', { description: 'Whole milk' });
+      expect(editor()).toBeNull();
+      expect(text()).toContain('Whole milk');
+    });
+
+    it('clears the description when the text is removed', () => {
+      boardsService.updateCard.and.returnValue(of({ card_id: 9, card_title: 'Buy milk', description: '' }));
+      start(details);
+
+      type('   ');
+      clickButton('Save description');
+      fixture.detectChanges();
+
+      expect(boardsService.updateCard).toHaveBeenCalledOnceWith('9', { description: '' });
+      expect(emptyDescription()).not.toBeNull();
+    });
+
+    it('closes without a request when nothing changed', () => {
+      start(details);
+
+      clickButton('Save description');
+      fixture.detectChanges();
+
+      expect(boardsService.updateCard).not.toHaveBeenCalled();
+      expect(editor()).toBeNull();
+    });
+
+    it('cancel drops the text and Esc does not close the dialog', () => {
+      start(details);
+      const reachedDocument = jasmine.createSpy('reachedDocument');
+      document.body.appendChild(fixture.nativeElement);
+      document.addEventListener('keydown', reachedDocument);
+
+      type('Throw this away');
+      editor()!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      fixture.detectChanges();
+      document.removeEventListener('keydown', reachedDocument);
+      fixture.nativeElement.remove();
+
+      expect(editor()).toBeNull();
+      expect(reachedDocument).not.toHaveBeenCalled();
+      expect(text()).toContain('Semi-skimmed');
+      expect(text()).not.toContain('Throw this away');
+    });
+
+    it('keeps the typed text and reports it when the save fails', () => {
+      boardsService.updateCard.and.returnValue(throwError(() => new Error('500')));
+      start(details);
+
+      type('Do not lose me');
+      clickButton('Save description');
+      fixture.detectChanges();
+
+      expect(editor()?.value).toBe('Do not lose me');
+      expect(text()).toContain("Couldn't save the description.");
+    });
+
+    it('sends one request when Save is clicked twice', () => {
+      const pending = new Subject<{ card_id: number; card_title: string; description: string | null }>();
+      boardsService.updateCard.and.returnValue(pending);
+      start(details);
+
+      type('Whole milk');
+      component.saveDescription();
+      component.saveDescription();
+
+      expect(boardsService.updateCard).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('shows an error and stays open when the request fails', () => {

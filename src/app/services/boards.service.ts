@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ListType } from '../models/list.model';
 import { Board } from '../models/boards.model';
-import { CardDetailsResponse, NewCardResponse } from '../models/card-details.model';
+import { CardChanges, CardDetailsResponse, NewCardResponse } from '../models/card-details.model';
 
 @Injectable({
   providedIn: 'root'
@@ -33,6 +33,10 @@ export class BoardsService {
 
   updateList(listId: string, name: string): Observable<Pick<ListType, 'listId' | 'listName'>> {
     return this.http.post<Pick<ListType, 'listId' | 'listName'>>(`${environment.apiUrl}/api/updateList`, { listId, name });
+  }
+
+  updateCard(cardId: string, changes: CardChanges): Observable<Pick<CardDetailsResponse, 'card_id' | 'card_title' | 'description'>> {
+    return this.http.post<Pick<CardDetailsResponse, 'card_id' | 'card_title' | 'description'>>(`${environment.apiUrl}/api/updateCard`, { cardId, ...changes });
   }
 
   // Returns the raw cards row; callers map it to the Card shape the board uses.

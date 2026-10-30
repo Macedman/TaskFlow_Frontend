@@ -32,10 +32,16 @@ export class TaskcardComponent implements OnInit {
   }
 
   openDialog() {
-    const dialogRef = this.dialog.open<string>(EditTaskcardModalComponent, {
+    const dialogRef = this.dialog.open<string, unknown, EditTaskcardModalComponent>(EditTaskcardModalComponent, {
       height: 'auto',
       width: 'auto',
       data: { cardId: this.card.card_id },
+    });
+
+    //cardTitle is a copy, so the board only shows a rename if the modal reports it
+    dialogRef.componentInstance?.titleChanged.subscribe(title => {
+      this.card.card_title = title;
+      this.cardTitle = title;
     });
 
     dialogRef.closed.subscribe(result => {
