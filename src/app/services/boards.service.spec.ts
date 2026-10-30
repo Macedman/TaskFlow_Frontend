@@ -98,6 +98,19 @@ describe('BoardsService', () => {
     expect(result).toEqual(created);
   });
 
+  it('updateList posts the listId and name and returns the renamed list', () => {
+    const renamed = { listId: '7', listName: 'Doing' };
+    let result: unknown;
+    service.updateList('7', 'Doing').subscribe(list => (result = list));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/updateList`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ listId: '7', name: 'Doing' });
+    req.flush(renamed);
+
+    expect(result).toEqual(renamed);
+  });
+
   it('addTask surfaces a 404 when the list is not accessible', () => {
     let status: number | undefined;
     service.addTask('999', 'Buy milk').subscribe({ error: err => (status = err.status) });
