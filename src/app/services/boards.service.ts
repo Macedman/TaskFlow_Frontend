@@ -31,6 +31,10 @@ export class BoardsService {
     return this.http.post<ListType>(`${environment.apiUrl}/api/addList`, { boardId, name });
   }
 
+  updateList(listId: string, name: string): Observable<Pick<ListType, 'listId' | 'listName'>> {
+    return this.http.post<Pick<ListType, 'listId' | 'listName'>>(`${environment.apiUrl}/api/updateList`, { listId, name });
+  }
+
   // Returns the raw cards row; callers map it to the Card shape the board uses.
   addTask(listId: string, title: string): Observable<NewCardResponse> {
     return this.http.post<NewCardResponse>(`${environment.apiUrl}/api/addTask`, { listId, title });
