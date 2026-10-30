@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ListType } from '../models/list.model';
 import { Board } from '../models/boards.model';
-import { NewCardResponse } from '../models/card-details.model';
+import { CardDetailsResponse, NewCardResponse } from '../models/card-details.model';
 
 @Injectable({
   providedIn: 'root'
@@ -18,8 +18,8 @@ export class BoardsService {
     return this.http.post<ListType[]>(`${environment.apiUrl}/api/getTasks`, { boardId });
   }
 
-  getTaskDetails(cardId: string):Observable<any> {
-    return this.http.post<any>(`${environment.apiUrl}/api/getTaskDetails`, {cardId});
+  getTaskDetails(cardId: string): Observable<CardDetailsResponse> {
+    return this.http.post<CardDetailsResponse>(`${environment.apiUrl}/api/getTaskDetails`, { cardId });
   }
 
   getBoards(): Observable<Board[]> {

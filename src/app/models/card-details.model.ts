@@ -17,3 +17,17 @@ export interface NewCardResponse {
   due_date: string | null;
   created_at: string;
 }
+
+// Returned by POST /api/getTaskDetails. The ids are INTEGER columns, which pg returns as numbers.
+export interface CardDetailsResponse {
+  card_id: number;
+  card_title: string;
+  description: string | null;
+  position: number;
+  due_date: string | null;
+  created_at: string;
+  list_id: number;
+  list_name: string;
+  board_id: number;
+  board_name: string;
+}
