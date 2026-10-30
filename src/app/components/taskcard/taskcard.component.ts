@@ -35,6 +35,7 @@ export class TaskcardComponent implements OnInit {
     const dialogRef = this.dialog.open<string>(EditTaskcardModalComponent, {
       height: 'auto',
       width: 'auto',
+      data: { cardId: this.card.card_id },
     });
 
     dialogRef.closed.subscribe(result => {

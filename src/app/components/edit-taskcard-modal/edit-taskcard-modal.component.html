@@ -1,46 +1,34 @@
-<div class="w-[1084px] h-auto">
-  <header class="border-b-[1px]">
+<div class="w-[1084px] max-w-[calc(100vw-32px)] h-auto">
+  <header class="border-b-[1px] border-(--modal-border)">
     <div class="flex justify-between items-center min-h-[56px] px-5">
       <div>
-        <button
-          class="bg-[#DCDFE4] text-[#091E42] p-[0.25rem] rounded hover:bg-[#B3B9C4] font-[600] text-[14px]"
-        >
-          Todo
-          <svg
-            class="inline"
-            xmlns="http://www.w3.org/2000/svg"
-            height="20px"
-            viewBox="0 -960 960 960"
-            width="20px"
-            fill="#091E42"
+        @if (card) {
+          <button
+            class="list-button bg-(--modal-control) text-(--modal-text) p-[0.25rem_0.5rem] rounded hover:bg-(--modal-control-hover) font-[600] text-[14px]"
           >
-            <path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z" />
-          </svg>
-        </button>
+            {{ card.list_name }}
+            <svg
+              class="inline"
+              xmlns="http://www.w3.org/2000/svg"
+              height="20px"
+              viewBox="0 -960 960 960"
+              width="20px"
+              fill="currentColor"
+            >
+              <path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z" />
+            </svg>
+          </button>
+        }
       </div>
 
-      <div class="flex gap-4">
+      <div class="flex gap-4 text-(--modal-text)">
         <button>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24px"
             viewBox="0 -960 960 960"
             width="24px"
-            fill="#091E42"
-          >
-            <path
-              d="M720-440v-80h160v80H720Zm48 280-128-96 48-64 128 96-48 64Zm-80-480-48-64 128-96 48 64-128 96ZM200-200v-160h-40q-33 0-56.5-23.5T80-440v-80q0-33 23.5-56.5T160-600h160l200-120v480L320-360h-40v160h-80Zm240-182v-196l-98 58H160v80h182l98 58Zm120 36v-268q27 24 43.5 58.5T620-480q0 41-16.5 75.5T560-346ZM300-480Z"
-            />
-          </svg>
-        </button>
-        <span class="w-[1px] h-[20px] bg-[hsla(218,54%,19.6%,0.16)]"></span>
-        <button>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="#091E42"
+            fill="currentColor"
           >
             <path
               d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm40-80h480L570-480 450-320l-90-120-120 160Zm-40 80v-560 560Zm140-360q25 0 42.5-17.5T400-620q0-25-17.5-42.5T340-680q-25 0-42.5 17.5T280-620q0 25 17.5 42.5T340-560Z"
@@ -53,20 +41,20 @@
             height="24px"
             viewBox="0 -960 960 960"
             width="24px"
-            fill="#091E42"
+            fill="currentColor"
           >
             <path
               d="M240-400q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm240 0q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm240 0q-33 0-56.5-23.5T640-480q0-33 23.5-56.5T720-560q33 0 56.5 23.5T800-480q0 33-23.5 56.5T720-400Z"
             />
           </svg>
         </button>
-        <button>
+        <button class="cursor-pointer" aria-label="Close" (click)="close()">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24px"
             viewBox="0 -960 960 960"
             width="24px"
-            fill="#091E42"
+            fill="currentColor"
           >
             <path
               d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
@@ -77,291 +65,186 @@
     </div>
   </header>
   <div class="flex">
-    <main
-      class="grid grid-cols-[1fr] grid-rows-[0fr_1fr] w-[100%] overflow-y-auto flex-auto"
-    >
+    <main class="flex-1 min-w-0 overflow-y-auto">
       <!-- 1st Section -->
-      <section class="p-[24px_20px_16px]">
-        <div class="flex items-center justify-center h-[72px] gap-3">
+      <section class="p-[24px_20px_8px]">
+        @if (loadError) {
+          <p class="text-red-400 text-[14px] mb-2" role="alert">Couldn't load this card.</p>
+        }
+        <div class="flex items-center justify-center gap-3">
           <button
-            class="bg-white border-1 border-black rounded-full w-4 h-4 flex-shrink-0 self-start mt-[6px]"
+            class="bg-transparent border-2 border-(--modal-muted) rounded-full w-4 h-4 flex-shrink-0 self-start mt-[9px]"
           ></button>
 
           <textarea
-            class="text-[#172B4D] font-[600] w-full text-[28px] resize-none p-[4px_8px] h-full"
+            class="text-(--modal-text) bg-transparent font-[600] w-full text-[28px] resize-none p-[4px_8px] outline-none"
             rows="1"
-            placeholder="Enter Something"
-            >{{ title }}</textarea
-          >
+            readonly
+            [placeholder]="isLoading ? 'Loading...' : ''"
+            [value]="card?.card_title ?? ''"
+          ></textarea>
         </div>
       </section>
-      <div class="min-w-[444px] max-w-[640px] p-[0_2.5rem_1rem_1.25rem]">
+      <div class="p-[0_1.25rem_1.5rem]">
         <section class="mb-[32px]">
-          <div>
-            <div class="flex gap-2 text-[#44546F] ml-[50px] text-[14px]">
-              <button
-                class="rounded border-1 border-[#091E4224] p-[0.25rem_0.50rem] h-full"
+          <div class="flex flex-wrap gap-2 text-(--modal-muted) ml-[28px] text-[14px] font-[500]">
+            <button
+              class="rounded border-1 border-(--modal-border) p-[0.25rem_0.50rem] hover:bg-(--modal-aside-bg)"
+            >
+              <svg
+                class="inline size-[16px]"
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="currentColor"
               >
-                <svg
-                  class="inline size-[16px]"
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24px"
-                  viewBox="0 -960 960 960"
-                  width="24px"
-                  fill="#091E42"
-                >
-                  <path
-                    d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"
-                  />
-                </svg>
-                Add
-              </button>
-              <button
-                class="rounded border-1 border-[#091E4224] p-[0.25rem_0.50rem] h-full"
+                <path
+                  d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"
+                />
+              </svg>
+              Add
+            </button>
+            <button
+              class="rounded border-1 border-(--modal-border) p-[0.25rem_0.50rem] hover:bg-(--modal-aside-bg)"
+            >
+              <svg
+                class="inline size-[16px]"
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="currentColor"
               >
-                <svg
-                  class="inline size-[16px]"
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24px"
-                  viewBox="0 -960 960 960"
-                  width="24px"
-                  fill="#091E42"
-                >
-                  <path
-                    d="m520-260 140-140q11-11 17.5-26t6.5-32q0-34-24-58t-58-24q-19 0-37.5 11T520-492q-30-28-47-38t-35-10q-34 0-58 24t-24 58q0 17 6.5 32t17.5 26l140 140Zm336-130L570-104q-12 12-27 18t-30 6q-15 0-30-6t-27-18L103-457q-11-11-17-25.5T80-513v-287q0-33 23.5-56.5T160-880h287q16 0 31 6.5t26 17.5l352 353q12 12 17.5 27t5.5 30q0 15-5.5 29.5T856-390ZM513-160l286-286-353-354H160v286l353 354ZM260-640q25 0 42.5-17.5T320-700q0-25-17.5-42.5T260-760q-25 0-42.5 17.5T200-700q0 25 17.5 42.5T260-640Zm220 160Z"
-                  />
-                </svg>
-                Labels
-              </button>
-              <button
-                class="rounded border-1 border-[#091E4224] p-[0.25rem_0.50rem] h-full"
+                <path
+                  d="m520-260 140-140q11-11 17.5-26t6.5-32q0-34-24-58t-58-24q-19 0-37.5 11T520-492q-30-28-47-38t-35-10q-34 0-58 24t-24 58q0 17 6.5 32t17.5 26l140 140Zm336-130L570-104q-12 12-27 18t-30 6q-15 0-30-6t-27-18L103-457q-11-11-17-25.5T80-513v-287q0-33 23.5-56.5T160-880h287q16 0 31 6.5t26 17.5l352 353q12 12 17.5 27t5.5 30q0 15-5.5 29.5T856-390ZM513-160l286-286-353-354H160v286l353 354ZM260-640q25 0 42.5-17.5T320-700q0-25-17.5-42.5T260-760q-25 0-42.5 17.5T200-700q0 25 17.5 42.5T260-640Zm220 160Z"
+                />
+              </svg>
+              Labels
+            </button>
+            <button
+              class="rounded border-1 border-(--modal-border) p-[0.25rem_0.50rem] hover:bg-(--modal-aside-bg)"
+            >
+              <svg
+                class="inline size-[16px]"
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="currentColor"
               >
-                <svg
-                  class="inline size-[16px]"
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24px"
-                  viewBox="0 -960 960 960"
-                  width="24px"
-                  fill="#091E42"
-                >
-                  <path
-                    d="m612-292 56-56-148-148v-184h-80v216l172 172ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-400Zm0 320q133 0 226.5-93.5T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 133 93.5 226.5T480-160Z"
-                  />
-                </svg>
-                Dates
-              </button>
-              <button
-                class="rounded border-1 border-[#091E4224] p-[0.25rem_0.50rem] h-full"
+                <path
+                  d="m612-292 56-56-148-148v-184h-80v216l172 172ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-400Zm0 320q133 0 226.5-93.5T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 133 93.5 226.5T480-160Z"
+                />
+              </svg>
+              Dates
+            </button>
+            <button
+              class="rounded border-1 border-(--modal-border) p-[0.25rem_0.50rem] hover:bg-(--modal-aside-bg)"
+            >
+              <svg
+                class="inline size-[16px]"
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="currentColor"
               >
-                <svg
-                  class="inline size-[16px]"
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24px"
-                  viewBox="0 -960 960 960"
-                  width="24px"
-                  fill="#091E42"
-                >
-                  <path
-                    d="m424-318 282-282-56-56-226 226-114-114-56 56 170 170ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h168q13-36 43.5-58t68.5-22q38 0 68.5 22t43.5 58h168q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm280-590q13 0 21.5-8.5T510-820q0-13-8.5-21.5T480-850q-13 0-21.5 8.5T450-820q0 13 8.5 21.5T480-790ZM200-200v-560 560Z"
-                  />
-                </svg>
-                Checklist
-              </button>
-              <button
-                class="rounded border-1 border-[#091E4224] p-[0.25rem_0.50rem] h-full"
+                <path
+                  d="m424-318 282-282-56-56-226 226-114-114-56 56 170 170ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h168q13-36 43.5-58t68.5-22q38 0 68.5 22t43.5 58h168q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm280-590q13 0 21.5-8.5T510-820q0-13-8.5-21.5T480-850q-13 0-21.5 8.5T450-820q0 13 8.5 21.5T480-790ZM200-200v-560 560Z"
+                />
+              </svg>
+              Checklist
+            </button>
+            <button
+              class="rounded border-1 border-(--modal-border) p-[0.25rem_0.50rem] hover:bg-(--modal-aside-bg)"
+            >
+              <svg
+                class="inline size-[16px]"
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="currentColor"
               >
-                <svg
-                  class="inline size-[16px]"
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24px"
-                  viewBox="0 -960 960 960"
-                  width="24px"
-                  fill="#091E42"
-                >
-                  <path
-                    d="M720-400v-120H600v-80h120v-120h80v120h120v80H800v120h-80Zm-360-80q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM40-160v-112q0-34 17.5-62.5T104-378q62-31 126-46.5T360-440q66 0 130 15.5T616-378q29 15 46.5 43.5T680-272v112H40Zm80-80h480v-32q0-11-5.5-20T580-306q-54-27-109-40.5T360-360q-56 0-111 13.5T140-306q-9 5-14.5 14t-5.5 20v32Zm240-320q33 0 56.5-23.5T440-640q0-33-23.5-56.5T360-720q-33 0-56.5 23.5T280-640q0 33 23.5 56.5T360-560Zm0-80Zm0 400Z"
-                  />
-                </svg>
-                Members
-              </button>
-            </div>
+                <path
+                  d="M720-400v-120H600v-80h120v-120h80v120h120v80H800v120h-80Zm-360-80q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM40-160v-112q0-34 17.5-62.5T104-378q62-31 126-46.5T360-440q66 0 130 15.5T616-378q29 15 46.5 43.5T680-272v112H40Zm80-80h480v-32q0-11-5.5-20T580-306q-54-27-109-40.5T360-360q-56 0-111 13.5T140-306q-9 5-14.5 14t-5.5 20v32Zm240-320q33 0 56.5-23.5T440-640q0-33-23.5-56.5T360-720q-33 0-56.5 23.5T280-640q0 33 23.5 56.5T360-560Zm0-80Zm0 400Z"
+                />
+              </svg>
+              Members
+            </button>
           </div>
         </section>
         <!-- 2nd Section -->
-        <section
-          class="grid grid-cols-[0fr_1fr_0fr] grid-rows-[0fr_1fr] w-full gap-y-[8px] mb-[32px]"
-        >
-          <div class="mr-3">
-            <svg
-              class="w-[20px] h-[24px]"
-              xmlns="http://www.w3.org/2000/svg"
-              height="24px"
-              viewBox="0 -960 960 960"
-              width="24px"
-              fill="#091E42"
-            >
-              <path
-                d="M160-200v-80h400v80H160Zm0-160v-80h640v80H160Zm0-160v-80h640v80H160Zm0-160v-80h640v80H160Z"
-              />
-            </svg>
-          </div>
-
-          <div class="">
-            <h3 class="text-[14px] text-[#091E42] font-[600]">Description</h3>
-          </div>
-          <div class="">
-            <button
-              class="rounded bg-[#091E420F] text-[#172B4D] text-[14px] font-[500] p-[0.25rem_0.50rem] hover:bg-[#091E4224] h-full"
-            >
-              Edit
-            </button>
-          </div>
-          <div class="col-start-2">
-            <p class="text-[#172B4D] text-[14px] font-[400]">
-              Use JWT: create Auth Guards
-            </p>
-          </div>
-        </section>
-        <!-- 3rd Section -->
-        <section
-          class="grid grid-cols-[0fr_1fr_0fr] grid-rows-[0fr_1fr] w-full gap-y-[8px] mb-[32px]"
-        >
-          <div class="mr-3">
-            <svg
-              class="w-[20px] h-[24px]"
-              xmlns="http://www.w3.org/2000/svg"
-              height="24px"
-              viewBox="0 -960 960 960"
-              width="24px"
-              fill="#091E42"
-            >
-              <path
-                d="M330-240q-104 0-177-73T80-490q0-104 73-177t177-73h370q75 0 127.5 52.5T880-560q0 75-52.5 127.5T700-380H350q-46 0-78-32t-32-78q0-46 32-78t78-32h370v80H350q-13 0-21.5 8.5T320-490q0 13 8.5 21.5T350-460h350q42-1 71-29.5t29-70.5q0-42-29-71t-71-29H330q-71-1-120.5 49T160-490q0 70 49.5 119T330-320h390v80H330Z"
-              />
-            </svg>
-          </div>
-          <div>
-            <h3 class="text-[14px] text-[#091E42] font-[600]">Attachments</h3>
-          </div>
-          <div>
-            <button
-              class="rounded bg-[#091E420F] text-[#172B4D] text-[14px] font-[500] p-[0.25rem_0.50rem] hover:bg-[#091E4224] h-full"
-            >
-              Edit
-            </button>
-          </div>
-          <div class="col-start-2">
-            <h3 class="text-[14px] text-[#091E42] font-[600]">Files</h3>
-            <li class="flex">
-              <ul>
-                <div class="flex gap-x-3">
-                  <div
-                    class="min-w-[64px] h-[48px] text-[#44546F] uppercase text-[14px] bg-[#091E420F] rounded shadow-(--my-shadow) cursor-pointer flex items-center justify-center overflow-hidden"
-                  >
-                    <a href="" class="text-[14px] text-[#172B4D] font-[600]">
-                      <span>docx</span>
-                    </a>
-                  </div>
-                  <div class="cursor-grab">
-                    <div>
-                      <span class="text-[14px] text-[#172B4D] font-[600]">
-                        Project Idea.docx
-                      </span>
-                    </div>
-                    <p>
-                      <span class="text-[12px] text-[#44546F]">
-                        Added July 15, 2025, 10:45 PM
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              </ul>
-            </li>
-          </div>
-          <div class="flex items-center gap-x-3 mt-[14px]">
-            <a href="https://youtube.com">
-              <span
-                ><svg
-                  class="size-[16px]"
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24px"
-                  viewBox="0 -960 960 960"
-                  width="24px"
-                  fill="#091E42"
-                >
-                  <path
-                    d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"
-                  /></svg
-              ></span>
-            </a>
-            <button>
-              <span>
-                <svg
-                  class="size-[16px]"
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24px"
-                  viewBox="0 -960 960 960"
-                  width="24px"
-                  fill="#091E42"
-                >
-                  <path
-                    d="M240-400q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm240 0q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm240 0q-33 0-56.5-23.5T640-480q0-33 23.5-56.5T720-560q33 0 56.5 23.5T800-480q0 33-23.5 56.5T720-400Z"
-                  />
-                </svg>
-              </span>
-            </button>
-          </div>
+        <section class="grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-3 mb-[8px]">
+          <svg
+            class="w-[20px] h-[24px] text-(--modal-text)"
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill="currentColor"
+          >
+            <path
+              d="M160-200v-80h400v80H160Zm0-160v-80h640v80H160Zm0-160v-80h640v80H160Zm0-160v-80h640v80H160Z"
+            />
+          </svg>
+          <h3 class="text-[14px] font-[600]">Description</h3>
+          @if (card) {
+            <div class="col-start-2">
+              @if (card.description) {
+                <p class="text-[14px] font-[400] whitespace-pre-wrap">{{ card.description }}</p>
+              } @else {
+                <textarea
+                  class="w-full h-[60px] resize-none rounded border-1 border-(--modal-muted) bg-transparent p-[8px_12px] text-[14px] placeholder:text-(--modal-muted) outline-none"
+                  readonly
+                  placeholder="Add a more detailed description..."
+                ></textarea>
+              }
+            </div>
+          }
         </section>
       </div>
     </main>
     <aside
-      class="bg-[#F7F8F9] w-[444px] h-auto border-l-1 border-[#091E4224] flex-[1_0_auto]"
+      class="bg-(--modal-aside-bg) w-[444px] flex-shrink-0 border-l-1 border-(--modal-border)"
     >
-      <div>
-        <section
-          class="grid grid-cols-[0fr_1fr] grid-rows-[0fr_1fr] gap-x-3 gap-y-3 text-[#172B4D] p-5"
-        >
-          <div class="flex items-center">
-            <svg
-              class=""
-              xmlns="http://www.w3.org/2000/svg"
-              height="20px"
-              viewBox="0 -960 960 960"
-              width="20px"
-              fill="#091E42"
-            >
-              <path
-                d="M240-400h320v-80H240v80Zm0-120h480v-80H240v80Zm0-120h480v-80H240v80ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z"
-              />
-            </svg>
+      <section
+        class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-3 p-5"
+      >
+        <div class="flex items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="20px"
+            viewBox="0 -960 960 960"
+            width="20px"
+            fill="currentColor"
+          >
+            <path
+              d="M240-400h320v-80H240v80Zm0-120h480v-80H240v80Zm0-120h480v-80H240v80ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z"
+            />
+          </svg>
+        </div>
+        <hgroup class="flex justify-between items-center">
+          <h3 class="text-[14px] font-[600]">Comments and activity</h3>
+          <button class="rounded border-1 border-(--modal-border) font-[500] p-[6px_12px] cursor-pointer text-[14px] text-(--modal-muted) hover:bg-(--modal-control)">Show details</button>
+        </hgroup>
+        <div class="col-span-full">
+          <div class="bg-(--modal-field) flex rounded-lg h-[36px] w-full text-(--modal-muted) items-center p-[6px_12px] cursor-pointer font-[500] text-[14px]">
+            <button>Write a comment...</button>
           </div>
-          <hgroup class="flex justify-between items-center">
-            <h3 class="text-[14px] font-[600]">Comments and activity</h3>
-            <button class="bg-[#091E420F] rounded font-[500] p-[6px_12px] cursor-pointer text-[14px] hover:bg-[#091e4224] hover:text-[#172B4D]">Show Details</button>
-          </hgroup>
-          <div class="grid col-span-full">
-            <div class="bg-white flex rounded-xl h-[36px] w-full text-[#626F86] items-center p-[6px_12px] cursor-pointer font-[500] text-[14px] shadow-(--my-shadow)">
-              <button>Write a Comment...</button>
-            </div>
-          </div>
+        </div>
 
-          <ul class="grid col-span-full">
-            <li class="flex">
-              <div>
-                <button class="bg-[url(https://trello-members.s3.amazonaws.com/67ffd355ed89640e870016ef/d4ac7dcfc2453d6a41fea6edbc9ebde7/30.png)] size-[30px]"></button>
-              </div>
-              <div class="ml-1">
-                  <span class="font-bold">Eugene Clint Maceda </span>
-                  <span class="">added this card to To do</span>
-                  <br />
-                  <span>
-                    <a href="" class="text-[#0C66E4] text-[12px] underline">Apr 17, 2025, 12:15 AM </a>
-                  </span>
-              </div> 
+        @if (card) {
+          <ul class="col-span-full">
+            <li class="text-[14px]">
+              <span>Added to {{ card.list_name }}</span>
+              <br />
+              <time class="text-(--modal-link) text-[12px]">{{ card.created_at | date: 'MMM d, y, h:mm a' }}</time>
             </li>
           </ul>
-        </section>
-      </div>
+        }
+      </section>
     </aside>
   </div>
 </div>

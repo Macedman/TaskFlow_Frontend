@@ -42,6 +42,33 @@ describe('BoardsService', () => {
     req.flush([]);
   });
 
+  it('getTaskDetails posts the cardId and returns the card details', () => {
+    const details = {
+      card_id: 9, card_title: 'Buy milk', description: 'Semi-skimmed',
+      position: 0, due_date: null, created_at: '2026-10-30T00:00:00.000Z',
+      list_id: 7, list_name: 'Todo', board_id: 42, board_name: 'Home'
+    };
+    let result: unknown;
+    service.getTaskDetails('9').subscribe(card => (result = card));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/getTaskDetails`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ cardId: '9' });
+    req.flush(details);
+
+    expect(result).toEqual(details);
+  });
+
+  it('getTaskDetails surfaces a 404 when the card is not accessible', () => {
+    let status: number | undefined;
+    service.getTaskDetails('999').subscribe({ error: err => (status = err.status) });
+
+    httpMock.expectOne(`${environment.apiUrl}/api/getTaskDetails`)
+      .flush({ message: 'Card not found' }, { status: 404, statusText: 'Not Found' });
+
+    expect(status).toBe(404);
+  });
+
   it('addList posts the boardId and name and returns the created list', () => {
     const created = { listId: '7', listName: 'Todo', cards: [] };
     let result: unknown;

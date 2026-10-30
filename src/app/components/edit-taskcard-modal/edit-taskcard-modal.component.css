@@ -1,7 +1,18 @@
 :host {
   display: block;
-  background: #fff;
-  border-radius: 8px;
+  --modal-bg: #24262b;
+  --modal-aside-bg: #2f3136;
+  --modal-border: #43464c;
+  --modal-text: #cfd2d6;
+  --modal-muted: #a3a8b0;
+  --modal-control: #4a4d52;
+  --modal-control-hover: #5b5f65;
+  --modal-field: #1f2125;
+  --modal-link: #669df1;
+  background: var(--modal-bg);
+  color: var(--modal-text);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 /* .container {
