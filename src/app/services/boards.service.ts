@@ -24,4 +24,9 @@ export class BoardsService {
   getBoards(): Observable<Board[]> {
     return this.http.post<Board[]>(`${environment.apiUrl}/api/getBoards`, {});
   }
+
+  // Returns the created list in the same shape as a getTasks list, so it can be added to the board as-is.
+  addList(boardId: string, name: string): Observable<ListType> {
+    return this.http.post<ListType>(`${environment.apiUrl}/api/addList`, { boardId, name });
+  }
 }

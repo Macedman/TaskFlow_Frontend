@@ -41,4 +41,17 @@ describe('BoardsService', () => {
     expect(req.request.body).toEqual({ boardId: '42' });
     req.flush([]);
   });
+
+  it('addList posts the boardId and name and returns the created list', () => {
+    const created = { listId: '7', listName: 'Todo', cards: [] };
+    let result: unknown;
+    service.addList('42', 'Todo').subscribe(list => (result = list));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/addList`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ boardId: '42', name: 'Todo' });
+    req.flush(created);
+
+    expect(result).toEqual(created);
+  });
 });
