@@ -77,13 +77,22 @@
           ></button>
 
           <textarea
-            class="text-(--modal-text) bg-transparent font-[600] w-full text-[28px] resize-none p-[4px_8px] outline-none"
+            class="text-(--modal-text) bg-transparent font-[600] w-full text-[28px] resize-none overflow-hidden p-[4px_8px] outline-none rounded border-2 border-transparent focus:border-[#0C66E4]"
+            #titleInput
             rows="1"
-            readonly
+            aria-label="Card title"
+            maxlength="255"
+            [readonly]="!card"
             [placeholder]="isLoading ? 'Loading...' : ''"
-            [value]="card?.card_title ?? ''"
+            [formControl]="titleControl"
+            (keydown.enter)="onTitleEnter($event, titleInput)"
+            (keydown.escape)="onTitleEscape($event, titleInput)"
+            (blur)="saveTitle()"
           ></textarea>
         </div>
+        @if (titleError()) {
+          <p class="text-red-400 text-[14px] mt-2" role="alert">Couldn't save the title.</p>
+        }
       </section>
       <div class="p-[0_1.25rem_1.5rem]">
         <section class="mb-[32px]">
@@ -189,16 +198,60 @@
               d="M160-200v-80h400v80H160Zm0-160v-80h640v80H160Zm0-160v-80h640v80H160Zm0-160v-80h640v80H160Z"
             />
           </svg>
-          <h3 class="text-[14px] font-[600]">Description</h3>
+          <div class="flex justify-between items-center">
+            <h3 class="text-[14px] font-[600]">Description</h3>
+            @if (card?.description && !isEditingDescription()) {
+              <button
+                type="button"
+                class="rounded border-1 border-(--modal-border) font-[500] p-[4px_12px] cursor-pointer text-[14px] text-(--modal-muted) hover:bg-(--modal-control)"
+                aria-label="Edit description"
+                (click)="startEditingDescription()"
+              >
+                Edit
+              </button>
+            }
+          </div>
           @if (card) {
             <div class="col-start-2">
-              @if (card.description) {
+              @if (isEditingDescription()) {
+                <textarea
+                  #descriptionInput
+                  class="w-full h-[120px] resize-y rounded border-2 border-(--modal-muted) focus:border-[#0C66E4] bg-transparent p-[8px_12px] text-[14px] placeholder:text-(--modal-muted) outline-none"
+                  aria-label="Card description"
+                  placeholder="Add a more detailed description..."
+                  [formControl]="descriptionControl"
+                  (keydown.escape)="cancelEditingDescription($event)"
+                ></textarea>
+                @if (descriptionError()) {
+                  <p class="text-red-400 text-[14px] mt-1" role="alert">Couldn't save the description.</p>
+                }
+                <div class="mt-2 flex gap-2">
+                  <button
+                    type="button"
+                    class="bg-[#0C66E4] text-[14px] rounded font-[500] p-[6px_12px] cursor-pointer text-white disabled:opacity-50"
+                    aria-label="Save description"
+                    [disabled]="isSavingDescription()"
+                    (click)="saveDescription()"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    class="text-[14px] rounded font-[500] p-[6px_12px] cursor-pointer text-(--modal-muted) hover:bg-(--modal-control)"
+                    aria-label="Cancel editing description"
+                    (click)="cancelEditingDescription()"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              } @else if (card.description) {
                 <p class="text-[14px] font-[400] whitespace-pre-wrap">{{ card.description }}</p>
               } @else {
                 <textarea
-                  class="w-full h-[60px] resize-none rounded border-1 border-(--modal-muted) bg-transparent p-[8px_12px] text-[14px] placeholder:text-(--modal-muted) outline-none"
+                  class="w-full h-[60px] resize-none rounded border-1 border-(--modal-muted) bg-transparent p-[8px_12px] text-[14px] placeholder:text-(--modal-muted) outline-none cursor-pointer"
                   readonly
                   placeholder="Add a more detailed description..."
+                  (focus)="startEditingDescription()"
                 ></textarea>
               }
             </div>

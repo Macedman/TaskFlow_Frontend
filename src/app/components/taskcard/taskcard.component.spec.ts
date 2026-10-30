@@ -1,3 +1,4 @@
+import { EventEmitter } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Dialog } from '@angular/cdk/dialog';
 import { of } from 'rxjs';
@@ -22,6 +23,21 @@ describe('TaskcardComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows the new title when the card is renamed in the modal', () => {
+    const titleChanged = new EventEmitter<string>();
+    spyOn(TestBed.inject(Dialog), 'open').and.returnValue(
+      { closed: of(undefined), componentInstance: { titleChanged } } as any
+    );
+    component.card = { card_id: '9', card_title: 'Buy milk' };
+    component.openDialog();
+
+    titleChanged.emit('Buy oat milk');
+    fixture.detectChanges();
+
+    expect(component.card.card_title).toBe('Buy oat milk');
+    expect(fixture.nativeElement.textContent).toContain('Buy oat milk');
   });
 
   it('openDialog passes the clicked card id to the modal', () => {

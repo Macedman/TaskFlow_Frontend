@@ -111,6 +111,19 @@ describe('BoardsService', () => {
     expect(result).toEqual(renamed);
   });
 
+  it('updateCard sends only the fields being changed', () => {
+    const updated = { card_id: 9, card_title: 'Buy milk', description: 'Semi-skimmed' };
+    let result: unknown;
+    service.updateCard('9', { description: 'Semi-skimmed' }).subscribe(card => (result = card));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/updateCard`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ cardId: '9', description: 'Semi-skimmed' });
+    req.flush(updated);
+
+    expect(result).toEqual(updated);
+  });
+
   it('addTask surfaces a 404 when the list is not accessible', () => {
     let status: number | undefined;
     service.addTask('999', 'Buy milk').subscribe({ error: err => (status = err.status) });
