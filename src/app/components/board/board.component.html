@@ -12,7 +12,10 @@
         ></app-list>
         }
       </div>
-      <app-add-list></app-add-list>
+      <app-add-list
+        [boardId]="boardId"
+        (listAdded)="onListAdded($event)"
+      ></app-add-list>
       <app-bottom-navigation class="bottom-navigation"></app-bottom-navigation>
     </div>
   </div>

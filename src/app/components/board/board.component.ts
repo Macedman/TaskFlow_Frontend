@@ -23,6 +23,7 @@ export class BoardComponent implements OnInit {
   ) {}
 
   lists: ListType[] = [];
+  boardId: string = '';
 
   onListDrop(event: CdkDragDrop<Card[]>) {
     if (event.previousContainer === event.container) {
@@ -50,13 +51,19 @@ getTasks() {
   console.log('Board ID from route:', boardId);
 
   if (boardId) {
+  this.boardId = boardId;
   this.boardService.getTasks(boardId).subscribe((response) => {
   this.lists = response;
   console.log('Fetched lists:', this.lists);
 })
   }
 });
-  
+
 }
+
+  //new array reference so the @for re-renders with the created list at the end
+  onListAdded(list: ListType) {
+    this.lists = [...this.lists, list];
+  }
 
 }
