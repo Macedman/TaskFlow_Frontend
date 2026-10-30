@@ -6,6 +6,7 @@
       <div class="flex flex-row gap-5" cdkDropListGroup>
         @for (list of lists; track list.listId) {
         <app-list
+          [listId]="list.listId"
           [listTitle]="list.listName"
           [cards]="list.cards"
           (dropped)="onListDrop($event)"

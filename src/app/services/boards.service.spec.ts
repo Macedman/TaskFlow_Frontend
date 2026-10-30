@@ -54,4 +54,30 @@ describe('BoardsService', () => {
 
     expect(result).toEqual(created);
   });
+
+  it('addTask posts the listId and title and returns the created card row', () => {
+    const created = {
+      id: '9', list_id: '7', title: 'Buy milk', description: '',
+      position: 0, due_date: null, created_at: '2026-10-30T00:00:00.000Z'
+    };
+    let result: unknown;
+    service.addTask('7', 'Buy milk').subscribe(card => (result = card));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/addTask`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ listId: '7', title: 'Buy milk' });
+    req.flush(created, { status: 201, statusText: 'Created' });
+
+    expect(result).toEqual(created);
+  });
+
+  it('addTask surfaces a 404 when the list is not accessible', () => {
+    let status: number | undefined;
+    service.addTask('999', 'Buy milk').subscribe({ error: err => (status = err.status) });
+
+    httpMock.expectOne(`${environment.apiUrl}/api/addTask`)
+      .flush({ message: 'List not found' }, { status: 404, statusText: 'Not Found' });
+
+    expect(status).toBe(404);
+  });
 });
