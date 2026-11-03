@@ -20,10 +20,11 @@ describe('AppComponent', () => {
     expect(app.title).toEqual('taskflow-frontend');
   });
 
-  it('should render title', () => {
+  // the shell is only a router outlet now; the pages render inside it
+  it('should render the router outlet', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, taskflow-frontend');
+    expect(compiled.querySelector('router-outlet')).toBeTruthy();
   });
 });
