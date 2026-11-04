@@ -39,9 +39,19 @@ export class EditTaskcardModalComponent implements OnInit {
   commentError = signal(false);
   readonly commentInput = viewChild<ElementRef<HTMLTextAreaElement>>('commentInput');
 
+  //only decides which buttons to show; the server checks who may edit or delete
+  private currentUserId: number | undefined;
+  editingCommentId = signal<number | null>(null);
+  editCommentControl = new FormControl('');
+  isSavingCommentEdit = signal(false);
+  commentEditError = signal(false);
+  commentDeleteErrorId = signal<number | null>(null);
+  readonly editCommentInput = viewChild<ElementRef<HTMLTextAreaElement>>('editCommentInput');
+
   constructor(private boardsService: BoardsService) { }
 
   ngOnInit() {
+    this.currentUserId = JSON.parse(localStorage.getItem('user') || '{}').id;
     this.isLoading = true;
     this.boardsService.getTaskDetails(this.data.cardId).subscribe({
       next: (card) => {
@@ -175,6 +185,62 @@ export class EditTaskcardModalComponent implements OnInit {
         this.isSavingComment.set(false);
         this.commentError.set(true);
       }
+    });
+  }
+
+  canEditComment(comment: CardComment) {
+    return comment.user_id === this.currentUserId;
+  }
+
+  canDeleteComment(comment: CardComment) {
+    return this.canEditComment(comment) || this.card?.board_owner_id === this.currentUserId;
+  }
+
+  startEditingComment(comment: CardComment) {
+    this.commentEditError.set(false);
+    this.editCommentControl.setValue(comment.body);
+    this.editingCommentId.set(comment.comment_id);
+    setTimeout(() => this.editCommentInput()?.nativeElement.focus());
+  }
+
+  cancelEditingComment(event?: Event) {
+    event?.stopPropagation(); //otherwise Esc also reaches the dialog and closes it
+    this.editingCommentId.set(null);
+  }
+
+  saveCommentEdit(comment: CardComment) {
+    if (this.isSavingCommentEdit()) return;
+    const body = this.editCommentControl.value?.trim();
+
+    //a blank or unchanged edit just closes, like the description editor
+    if (!body || body === comment.body) {
+      this.editingCommentId.set(null);
+      return;
+    }
+
+    this.commentEditError.set(false);
+    this.isSavingCommentEdit.set(true);
+    this.boardsService.updateComment(comment.comment_id, body).subscribe({
+      next: (updated) => {
+        this.comments.update(comments => comments.map(c => c.comment_id === updated.comment_id ? updated : c));
+        this.isSavingCommentEdit.set(false);
+        this.editingCommentId.set(null);
+      },
+      error: () => {
+        this.isSavingCommentEdit.set(false);
+        this.commentEditError.set(true);
+      }
+    });
+  }
+
+  deleteComment(comment: CardComment) {
+    //deleting can't be undone, so ask first
+    if (!confirm("Delete this comment? This can't be undone.")) return;
+
+    this.commentDeleteErrorId.set(null);
+    this.boardsService.deleteComment(comment.comment_id).subscribe({
+      next: () => this.comments.update(comments => comments.filter(c => c.comment_id !== comment.comment_id)),
+      error: () => this.commentDeleteErrorId.set(comment.comment_id)
     });
   }
 }
