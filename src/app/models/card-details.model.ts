@@ -29,6 +29,7 @@ export interface CardComment {
   comment_id: number;
   body: string;
   created_at: string;
+  updated_at: string | null; // null until the comment is edited
   user_id: number;
   author_name: string;
 }
@@ -45,4 +46,5 @@ export interface CardDetailsResponse {
   list_name: string;
   board_id: number;
   board_name: string;
+  board_owner_id: number;
 }

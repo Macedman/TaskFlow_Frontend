@@ -336,13 +336,72 @@
         @if (card) {
           <ul class="col-span-full flex flex-col gap-4">
             @for (comment of comments(); track comment.comment_id) {
-              <li class="text-[14px]">
+              <li class="text-[14px]" [attr.data-comment-id]="comment.comment_id">
                 <span class="font-[600]">{{ comment.author_name }}</span>
                 <time class="text-(--modal-link) text-[12px] ml-2">{{ comment.created_at | date: 'MMM d, y, h:mm a' }}</time>
-                <p
-                  class="mt-1 bg-(--modal-field) rounded-lg p-[8px_12px] whitespace-pre-wrap break-words"
-                  data-testid="comment-body"
-                >{{ comment.body }}</p>
+                @if (comment.updated_at) {
+                  <span class="text-(--modal-muted) text-[12px] ml-1">(edited)</span>
+                }
+                @if (editingCommentId() === comment.comment_id) {
+                  <textarea
+                    #editCommentInput
+                    class="mt-1 w-full h-[80px] resize-y rounded-lg border-2 border-(--modal-muted) focus:border-[#0C66E4] bg-(--modal-field) p-[8px_12px] text-[14px] outline-none"
+                    aria-label="Edit comment"
+                    maxlength="5000"
+                    [formControl]="editCommentControl"
+                    (keydown.escape)="cancelEditingComment($event)"
+                  ></textarea>
+                  @if (commentEditError()) {
+                    <p class="text-red-400 text-[14px] mt-1" role="alert">Couldn't save the comment.</p>
+                  }
+                  <div class="mt-2 flex gap-2">
+                    <button
+                      type="button"
+                      class="bg-[#0C66E4] text-[14px] rounded font-[500] p-[6px_12px] cursor-pointer text-white disabled:opacity-50"
+                      aria-label="Save comment edit"
+                      [disabled]="isSavingCommentEdit()"
+                      (click)="saveCommentEdit(comment)"
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      class="text-[14px] rounded font-[500] p-[6px_12px] cursor-pointer text-(--modal-muted) hover:bg-(--modal-control)"
+                      aria-label="Cancel comment edit"
+                      (click)="cancelEditingComment()"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                } @else {
+                  <p
+                    class="mt-1 bg-(--modal-field) rounded-lg p-[8px_12px] whitespace-pre-wrap break-words"
+                    data-testid="comment-body"
+                  >{{ comment.body }}</p>
+                  @if (canEditComment(comment) || canDeleteComment(comment)) {
+                    <div class="mt-1 flex gap-2 text-[12px] text-(--modal-muted)">
+                      @if (canEditComment(comment)) {
+                        <button
+                          type="button"
+                          class="underline cursor-pointer hover:text-(--modal-text)"
+                          aria-label="Edit comment"
+                          (click)="startEditingComment(comment)"
+                        >Edit</button>
+                      }
+                      @if (canDeleteComment(comment)) {
+                        <button
+                          type="button"
+                          class="underline cursor-pointer hover:text-(--modal-text)"
+                          aria-label="Delete comment"
+                          (click)="deleteComment(comment)"
+                        >Delete</button>
+                      }
+                    </div>
+                  }
+                  @if (commentDeleteErrorId() === comment.comment_id) {
+                    <p class="text-red-400 text-[14px] mt-1" role="alert">Couldn't delete the comment.</p>
+                  }
+                }
               </li>
             }
             <li class="text-[14px]">

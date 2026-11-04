@@ -48,6 +48,16 @@ export class BoardsService {
     return this.http.post<CardComment>(`${environment.apiUrl}/api/addComment`, { cardId, body });
   }
 
+  // Only the author can edit; the server answers 404 for anyone else.
+  updateComment(commentId: number, body: string): Observable<CardComment> {
+    return this.http.post<CardComment>(`${environment.apiUrl}/api/updateComment`, { commentId, body });
+  }
+
+  // The author or the board owner can delete.
+  deleteComment(commentId: number): Observable<{ comment_id: number }> {
+    return this.http.post<{ comment_id: number }>(`${environment.apiUrl}/api/deleteComment`, { commentId });
+  }
+
   // Returns the raw cards row; callers map it to the Card shape the board uses.
   addTask(listId: string, title: string): Observable<NewCardResponse> {
     return this.http.post<NewCardResponse>(`${environment.apiUrl}/api/addTask`, { listId, title });

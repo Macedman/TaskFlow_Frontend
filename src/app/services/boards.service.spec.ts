@@ -152,6 +152,34 @@ describe('BoardsService', () => {
     expect(result).toEqual(saved);
   });
 
+  it('updateComment posts the commentId and body and returns the edited comment', () => {
+    const edited = {
+      comment_id: 4, body: 'Changed', created_at: '2026-11-03T00:00:00.000Z',
+      updated_at: '2026-11-04T00:00:00.000Z', user_id: 1, author_name: 'Sam'
+    };
+    let result: unknown;
+    service.updateComment(4, 'Changed').subscribe(comment => (result = comment));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/updateComment`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ commentId: 4, body: 'Changed' });
+    req.flush(edited);
+
+    expect(result).toEqual(edited);
+  });
+
+  it('deleteComment posts only the commentId', () => {
+    let result: unknown;
+    service.deleteComment(4).subscribe(res => (result = res));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/deleteComment`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ commentId: 4 });
+    req.flush({ comment_id: 4 });
+
+    expect(result).toEqual({ comment_id: 4 });
+  });
+
   it('addTask surfaces a 404 when the list is not accessible', () => {
     let status: number | undefined;
     service.addTask('999', 'Buy milk').subscribe({ error: err => (status = err.status) });

@@ -16,11 +16,11 @@ describe('EditTaskcardModalComponent', () => {
   const details: CardDetailsResponse = {
     card_id: 9, card_title: 'Buy milk', description: 'Semi-skimmed',
     position: 0, due_date: null, created_at: '2026-10-30T00:00:00.000Z',
-    list_id: 7, list_name: 'Groceries', board_id: 42, board_name: 'Home'
+    list_id: 7, list_name: 'Groceries', board_id: 42, board_name: 'Home', board_owner_id: 5
   };
 
   beforeEach(async () => {
-    boardsService = jasmine.createSpyObj<BoardsService>('BoardsService', ['getTaskDetails', 'updateCard', 'getComments', 'addComment']);
+    boardsService = jasmine.createSpyObj<BoardsService>('BoardsService', ['getTaskDetails', 'updateCard', 'getComments', 'addComment', 'updateComment', 'deleteComment']);
     boardsService.getComments.and.returnValue(of([]));
     dialogRef = jasmine.createSpyObj<DialogRef>('DialogRef', ['close']);
 
@@ -302,10 +302,12 @@ describe('EditTaskcardModalComponent', () => {
 
   describe('comments', () => {
     const older: CardComment = {
-      comment_id: 1, body: 'First comment', created_at: '2026-11-01T09:00:00.000Z', user_id: 1, author_name: 'Sam Lee'
+      comment_id: 1, body: 'First comment', created_at: '2026-11-01T09:00:00.000Z', updated_at: null,
+      user_id: 1, author_name: 'Sam Lee'
     };
     const newer: CardComment = {
-      comment_id: 2, body: 'Second comment', created_at: '2026-11-02T09:00:00.000Z', user_id: 2, author_name: 'Ana Cruz'
+      comment_id: 2, body: 'Second comment', created_at: '2026-11-02T09:00:00.000Z', updated_at: null,
+      user_id: 2, author_name: 'Ana Cruz'
     };
     const commentBox = () =>
       fixture.nativeElement.querySelector('textarea[aria-label="Write a comment"]') as HTMLTextAreaElement | null;
@@ -418,6 +420,160 @@ describe('EditTaskcardModalComponent', () => {
       expect(commentBox()).toBeNull();
       expect(reachedDocument).not.toHaveBeenCalled();
       expect(boardsService.addComment).not.toHaveBeenCalled();
+    });
+
+    describe('editing and deleting', () => {
+      // older is by user 1, newer by user 2; details.board_owner_id is 5
+      const loginAs = (id: number) => localStorage.setItem('user', JSON.stringify({ id }));
+      const commentItem = (id: number) =>
+        fixture.nativeElement.querySelector(`[data-comment-id="${id}"]`) as HTMLElement;
+      const buttonIn = (id: number, label: string) =>
+        commentItem(id).querySelector(`button[aria-label="${label}"]`) as HTMLButtonElement | null;
+      const editBox = () =>
+        fixture.nativeElement.querySelector('textarea[aria-label="Edit comment"]') as HTMLTextAreaElement | null;
+      const typeEdit = (value: string) => {
+        editBox()!.value = value;
+        editBox()!.dispatchEvent(new Event('input'));
+      };
+      const open = (comments: CardComment[]) => {
+        boardsService.getComments.and.returnValue(of(comments.map(c => ({ ...c }))));
+        fixture.detectChanges();
+      };
+      const startEditing = (id: number) => {
+        buttonIn(id, 'Edit comment')!.click();
+        fixture.detectChanges();
+      };
+
+      let savedUser: string | null;
+      beforeEach(() => {
+        savedUser = localStorage.getItem('user');
+        loginAs(1);
+      });
+      afterEach(() => {
+        if (savedUser === null) localStorage.removeItem('user');
+        else localStorage.setItem('user', savedUser);
+      });
+
+      it('shows Edit and Delete only on your own comments', () => {
+        open([newer, older]);
+
+        expect(buttonIn(1, 'Edit comment')).not.toBeNull();
+        expect(buttonIn(1, 'Delete comment')).not.toBeNull();
+        expect(buttonIn(2, 'Edit comment')).toBeNull();
+        expect(buttonIn(2, 'Delete comment')).toBeNull();
+      });
+
+      it('lets the board owner delete, but not edit, other comments', () => {
+        loginAs(5);
+        open([newer, older]);
+
+        expect(buttonIn(2, 'Delete comment')).not.toBeNull();
+        expect(buttonIn(2, 'Edit comment')).toBeNull();
+      });
+
+      it('marks a comment that has been edited', () => {
+        open([{ ...older, updated_at: '2026-11-03T09:00:00.000Z' }, newer]);
+
+        expect(commentItem(1).textContent).toContain('(edited)');
+        expect(commentItem(2).textContent).not.toContain('(edited)');
+      });
+
+      it('saves an edit, shows the new text and marks it edited', () => {
+        boardsService.updateComment.and.returnValue(of({ ...older, body: 'Fixed typo', updated_at: '2026-11-04T09:00:00.000Z' }));
+        open([older]);
+        startEditing(1);
+
+        expect(editBox()?.value).toBe('First comment');
+        typeEdit('  Fixed typo  ');
+        buttonIn(1, 'Save comment edit')!.click();
+        fixture.detectChanges();
+
+        expect(boardsService.updateComment).toHaveBeenCalledOnceWith(1, 'Fixed typo');
+        expect(editBox()).toBeNull();
+        expect(commentBodies()).toEqual(['Fixed typo']);
+        expect(commentItem(1).textContent).toContain('(edited)');
+      });
+
+      it('closes without a request when the text is unchanged or blank', () => {
+        open([older]);
+        startEditing(1);
+        buttonIn(1, 'Save comment edit')!.click();
+        fixture.detectChanges();
+
+        startEditing(1);
+        typeEdit('   ');
+        buttonIn(1, 'Save comment edit')!.click();
+        fixture.detectChanges();
+
+        expect(boardsService.updateComment).not.toHaveBeenCalled();
+        expect(commentBodies()).toEqual(['First comment']);
+      });
+
+      it('keeps the edit open with the typed text when the save fails', () => {
+        boardsService.updateComment.and.returnValue(throwError(() => new Error('500')));
+        open([older]);
+        startEditing(1);
+
+        typeEdit('Do not lose me');
+        buttonIn(1, 'Save comment edit')!.click();
+        fixture.detectChanges();
+
+        expect(editBox()?.value).toBe('Do not lose me');
+        expect(commentItem(1).textContent).toContain("Couldn't save the comment.");
+      });
+
+      it('Esc cancels the edit without closing the dialog', () => {
+        open([older]);
+        startEditing(1);
+        const reachedDocument = jasmine.createSpy('reachedDocument');
+        document.body.appendChild(fixture.nativeElement);
+        document.addEventListener('keydown', reachedDocument);
+
+        typeEdit('Never mind');
+        editBox()!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        fixture.detectChanges();
+        document.removeEventListener('keydown', reachedDocument);
+        fixture.nativeElement.remove();
+
+        expect(editBox()).toBeNull();
+        expect(reachedDocument).not.toHaveBeenCalled();
+        expect(commentBodies()).toEqual(['First comment']);
+      });
+
+      it('deletes a comment after confirming', () => {
+        spyOn(window, 'confirm').and.returnValue(true);
+        boardsService.deleteComment.and.returnValue(of({ comment_id: 1 }));
+        open([newer, older]);
+
+        buttonIn(1, 'Delete comment')!.click();
+        fixture.detectChanges();
+
+        expect(boardsService.deleteComment).toHaveBeenCalledOnceWith(1);
+        expect(commentBodies()).toEqual(['Second comment']);
+      });
+
+      it('does nothing when the delete is not confirmed', () => {
+        spyOn(window, 'confirm').and.returnValue(false);
+        open([older]);
+
+        buttonIn(1, 'Delete comment')!.click();
+        fixture.detectChanges();
+
+        expect(boardsService.deleteComment).not.toHaveBeenCalled();
+        expect(commentBodies()).toEqual(['First comment']);
+      });
+
+      it('keeps the comment and reports it when the delete fails', () => {
+        spyOn(window, 'confirm').and.returnValue(true);
+        boardsService.deleteComment.and.returnValue(throwError(() => new Error('500')));
+        open([older]);
+
+        buttonIn(1, 'Delete comment')!.click();
+        fixture.detectChanges();
+
+        expect(commentBodies()).toEqual(['First comment']);
+        expect(commentItem(1).textContent).toContain("Couldn't delete the comment.");
+      });
     });
   });
 
