@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ListType } from '../models/list.model';
 import { Board } from '../models/boards.model';
-import { CardChanges, CardComment, CardDetailsResponse, NewCardResponse } from '../models/card-details.model';
+import { CardAttachment, CardChanges, CardComment, CardDetailsResponse, NewCardResponse } from '../models/card-details.model';
 
 @Injectable({
   providedIn: 'root'
@@ -56,6 +56,21 @@ export class BoardsService {
   // The author or the board owner can delete.
   deleteComment(commentId: number): Observable<{ comment_id: number }> {
     return this.http.post<{ comment_id: number }>(`${environment.apiUrl}/api/deleteComment`, { commentId });
+  }
+
+  // Newest first.
+  getAttachments(cardId: string): Observable<CardAttachment[]> {
+    return this.http.post<CardAttachment[]>(`${environment.apiUrl}/api/getAttachments`, { cardId });
+  }
+
+  // The server only accepts http/https links and answers 400 for anything else.
+  addLinkAttachment(cardId: string, url: string, name: string): Observable<CardAttachment> {
+    return this.http.post<CardAttachment>(`${environment.apiUrl}/api/addLinkAttachment`, { cardId, url, name });
+  }
+
+  // The uploader or the board owner can delete.
+  deleteAttachment(attachmentId: number): Observable<{ attachment_id: number }> {
+    return this.http.post<{ attachment_id: number }>(`${environment.apiUrl}/api/deleteAttachment`, { attachmentId });
   }
 
   // Returns the raw cards row; callers map it to the Card shape the board uses.

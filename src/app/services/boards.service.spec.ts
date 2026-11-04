@@ -180,6 +180,40 @@ describe('BoardsService', () => {
     expect(result).toEqual({ comment_id: 4 });
   });
 
+  it('getAttachments posts the cardId and returns the attachments', () => {
+    const attachments = [{
+      attachment_id: 3, kind: 'link', name: 'Spec', url: 'https://example.com/', size_bytes: null,
+      created_at: '2026-11-04T00:00:00.000Z', user_id: 1, author_name: 'Sam'
+    }];
+    let result: unknown;
+    service.getAttachments('9').subscribe(list => (result = list));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/getAttachments`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ cardId: '9' });
+    req.flush(attachments);
+
+    expect(result).toEqual(attachments);
+  });
+
+  it('addLinkAttachment posts the cardId, url and display text', () => {
+    service.addLinkAttachment('9', 'https://example.com', 'Spec').subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/addLinkAttachment`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ cardId: '9', url: 'https://example.com', name: 'Spec' });
+    req.flush({}, { status: 201, statusText: 'Created' });
+  });
+
+  it('deleteAttachment posts only the attachmentId', () => {
+    service.deleteAttachment(3).subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/deleteAttachment`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ attachmentId: 3 });
+    req.flush({ attachment_id: 3 });
+  });
+
   it('addTask surfaces a 404 when the list is not accessible', () => {
     let status: number | undefined;
     service.addTask('999', 'Buy milk').subscribe({ error: err => (status = err.status) });

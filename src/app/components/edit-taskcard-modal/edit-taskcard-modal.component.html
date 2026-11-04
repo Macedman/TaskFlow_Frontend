@@ -98,7 +98,11 @@
         <section class="mb-[32px]">
           <div class="flex flex-wrap gap-2 text-(--modal-muted) ml-[28px] text-[14px] font-[500]">
             <button
-              class="rounded border-1 border-(--modal-border) p-[0.25rem_0.50rem] hover:bg-(--modal-aside-bg)"
+              type="button"
+              class="rounded border-1 border-(--modal-border) p-[0.25rem_0.50rem] hover:bg-(--modal-aside-bg) cursor-pointer"
+              aria-label="Add attachment"
+              [disabled]="!card"
+              (click)="startAddingLink()"
             >
               <svg
                 class="inline size-[16px]"
@@ -183,6 +187,58 @@
               Members
             </button>
           </div>
+          @if (isAddingLink()) {
+            <div class="ml-[28px] mt-3 max-w-[420px] rounded-lg border-1 border-(--modal-border) p-3 text-[14px]">
+              <h4 class="font-[600] mb-2">Attach a link</h4>
+              <label class="block text-[12px] text-(--modal-muted) mb-1" for="link-url">Paste a link</label>
+              <input
+                #linkUrlInput
+                id="link-url"
+                type="url"
+                class="w-full rounded border-2 border-(--modal-muted) focus:border-[#0C66E4] bg-transparent p-[6px_8px] outline-none"
+                aria-label="Link URL"
+                placeholder="https://..."
+                [formControl]="linkUrlControl"
+                (keydown.enter)="saveLink()"
+                (keydown.escape)="cancelAddingLink($event)"
+              />
+              <label class="block text-[12px] text-(--modal-muted) mt-2 mb-1" for="link-name">Display text (optional)</label>
+              <input
+                id="link-name"
+                type="text"
+                class="w-full rounded border-2 border-(--modal-muted) focus:border-[#0C66E4] bg-transparent p-[6px_8px] outline-none"
+                aria-label="Link display text"
+                maxlength="255"
+                [formControl]="linkNameControl"
+                (keydown.enter)="saveLink()"
+                (keydown.escape)="cancelAddingLink($event)"
+              />
+              @if (linkError() === 'invalid') {
+                <p class="text-red-400 text-[14px] mt-2" role="alert">Enter a link that starts with http:// or https://.</p>
+              } @else if (linkError() === 'failed') {
+                <p class="text-red-400 text-[14px] mt-2" role="alert">Couldn't attach the link.</p>
+              }
+              <div class="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  class="bg-[#0C66E4] text-[14px] rounded font-[500] p-[6px_12px] cursor-pointer text-white disabled:opacity-50"
+                  aria-label="Attach link"
+                  [disabled]="isSavingLink()"
+                  (click)="saveLink()"
+                >
+                  Attach
+                </button>
+                <button
+                  type="button"
+                  class="text-[14px] rounded font-[500] p-[6px_12px] cursor-pointer text-(--modal-muted) hover:bg-(--modal-control)"
+                  aria-label="Cancel attaching link"
+                  (click)="cancelAddingLink()"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          }
         </section>
         <!-- 2nd Section -->
         <section class="grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-3 mb-[8px]">
@@ -257,6 +313,55 @@
             </div>
           }
         </section>
+        <!-- Attachments: only shown when there is something real to list -->
+        @if (attachmentsLoadError()) {
+          <p class="ml-[28px] mt-6 text-red-400 text-[14px]" role="alert">Couldn't load attachments.</p>
+        }
+        @if (attachments().length) {
+          <section class="grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-3 mt-6">
+            <svg
+              class="w-[20px] h-[24px] text-(--modal-text)"
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="currentColor"
+            >
+              <path
+                d="M720-330q0 104-73 177T470-80q-104 0-177-73t-73-177v-370q0-75 52.5-127.5T400-880q75 0 127.5 52.5T580-700v350q0 46-32 78t-78 32q-46 0-78-32t-32-78v-370h80v370q0 13 8.5 21.5T470-320q13 0 21.5-8.5T500-350v-350q-1-42-29.5-71T400-800q-42 0-71 29t-29 71v370q-1 71 49 120.5T470-160q70 0 119-49.5T640-330v-390h80v390Z"
+              />
+            </svg>
+            <h3 class="text-[14px] font-[600]">Attachments</h3>
+            <ul class="col-start-2 flex flex-col gap-3">
+              @for (attachment of attachments(); track attachment.attachment_id) {
+                <li class="text-[14px]" [attr.data-attachment-id]="attachment.attachment_id">
+                  <!-- noopener: the opened page gets no handle back to this tab -->
+                  <a
+                    class="font-[500] text-(--modal-link) hover:underline break-all"
+                    data-testid="attachment-link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    [href]="attachment.url"
+                  >{{ attachment.name || attachment.url }}</a>
+                  <div class="flex gap-2 text-[12px] text-(--modal-muted)">
+                    <span>Added by {{ attachment.author_name }}, {{ attachment.created_at | date: 'MMM d, y, h:mm a' }}</span>
+                    @if (canDeleteAttachment(attachment)) {
+                      <button
+                        type="button"
+                        class="underline cursor-pointer hover:text-(--modal-text)"
+                        aria-label="Delete attachment"
+                        (click)="deleteAttachment(attachment)"
+                      >Delete</button>
+                    }
+                  </div>
+                  @if (attachmentDeleteErrorId() === attachment.attachment_id) {
+                    <p class="text-red-400 text-[14px] mt-1" role="alert">Couldn't delete the attachment.</p>
+                  }
+                </li>
+              }
+            </ul>
+          </section>
+        }
       </div>
     </main>
     <aside
