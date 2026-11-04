@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ListType } from '../models/list.model';
 import { Board } from '../models/boards.model';
-import { CardChanges, CardDetailsResponse, NewCardResponse } from '../models/card-details.model';
+import { CardChanges, CardComment, CardDetailsResponse, NewCardResponse } from '../models/card-details.model';
 
 @Injectable({
   providedIn: 'root'
@@ -37,6 +37,15 @@ export class BoardsService {
 
   updateCard(cardId: string, changes: CardChanges): Observable<Pick<CardDetailsResponse, 'card_id' | 'card_title' | 'description'>> {
     return this.http.post<Pick<CardDetailsResponse, 'card_id' | 'card_title' | 'description'>>(`${environment.apiUrl}/api/updateCard`, { cardId, ...changes });
+  }
+
+  // Newest first; the author comes from the JWT on the server, never from the body.
+  getComments(cardId: string): Observable<CardComment[]> {
+    return this.http.post<CardComment[]>(`${environment.apiUrl}/api/getComments`, { cardId });
+  }
+
+  addComment(cardId: string, body: string): Observable<CardComment> {
+    return this.http.post<CardComment>(`${environment.apiUrl}/api/addComment`, { cardId, body });
   }
 
   // Returns the raw cards row; callers map it to the Card shape the board uses.

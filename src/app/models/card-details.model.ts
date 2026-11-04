@@ -24,6 +24,15 @@ export interface CardChanges {
   description?: string;
 }
 
+// One comment from POST /api/getComments or /api/addComment, with its author's name joined in.
+export interface CardComment {
+  comment_id: number;
+  body: string;
+  created_at: string;
+  user_id: number;
+  author_name: string;
+}
+
 // Returned by POST /api/getTaskDetails. The ids are INTEGER columns, which pg returns as numbers.
 export interface CardDetailsResponse {
   card_id: number;
