@@ -282,14 +282,69 @@
           <h3 class="text-[14px] font-[600]">Comments and activity</h3>
           <button class="rounded border-1 border-(--modal-border) font-[500] p-[6px_12px] cursor-pointer text-[14px] text-(--modal-muted) hover:bg-(--modal-control)">Show details</button>
         </hgroup>
-        <div class="col-span-full">
-          <div class="bg-(--modal-field) flex rounded-lg h-[36px] w-full text-(--modal-muted) items-center p-[6px_12px] cursor-pointer font-[500] text-[14px]">
-            <button>Write a comment...</button>
+        @if (card) {
+          <div class="col-span-full">
+            @if (isWritingComment()) {
+              <textarea
+                #commentInput
+                class="w-full h-[80px] resize-y rounded-lg border-2 border-(--modal-muted) focus:border-[#0C66E4] bg-(--modal-field) p-[8px_12px] text-[14px] placeholder:text-(--modal-muted) outline-none"
+                aria-label="Write a comment"
+                placeholder="Write a comment..."
+                maxlength="5000"
+                [formControl]="commentControl"
+                (keydown.escape)="cancelWritingComment($event)"
+              ></textarea>
+              @if (commentError()) {
+                <p class="text-red-400 text-[14px] mt-1" role="alert">Couldn't save the comment.</p>
+              }
+              <div class="mt-2 flex gap-2">
+                <button
+                  type="button"
+                  class="bg-[#0C66E4] text-[14px] rounded font-[500] p-[6px_12px] cursor-pointer text-white disabled:opacity-50"
+                  aria-label="Save comment"
+                  [disabled]="isSavingComment()"
+                  (click)="saveComment()"
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  class="text-[14px] rounded font-[500] p-[6px_12px] cursor-pointer text-(--modal-muted) hover:bg-(--modal-control)"
+                  aria-label="Cancel comment"
+                  (click)="cancelWritingComment()"
+                >
+                  Cancel
+                </button>
+              </div>
+            } @else {
+              <button
+                type="button"
+                class="bg-(--modal-field) flex rounded-lg h-[36px] w-full text-(--modal-muted) items-center p-[6px_12px] cursor-pointer font-[500] text-[14px]"
+                aria-label="Write a comment"
+                (click)="startWritingComment()"
+              >
+                Write a comment...
+              </button>
+            }
           </div>
-        </div>
+        }
+
+        @if (commentsLoadError()) {
+          <p class="col-span-full text-red-400 text-[14px]" role="alert">Couldn't load comments.</p>
+        }
 
         @if (card) {
-          <ul class="col-span-full">
+          <ul class="col-span-full flex flex-col gap-4">
+            @for (comment of comments(); track comment.comment_id) {
+              <li class="text-[14px]">
+                <span class="font-[600]">{{ comment.author_name }}</span>
+                <time class="text-(--modal-link) text-[12px] ml-2">{{ comment.created_at | date: 'MMM d, y, h:mm a' }}</time>
+                <p
+                  class="mt-1 bg-(--modal-field) rounded-lg p-[8px_12px] whitespace-pre-wrap break-words"
+                  data-testid="comment-body"
+                >{{ comment.body }}</p>
+              </li>
+            }
             <li class="text-[14px]">
               <span>Added to {{ card.list_name }}</span>
               <br />

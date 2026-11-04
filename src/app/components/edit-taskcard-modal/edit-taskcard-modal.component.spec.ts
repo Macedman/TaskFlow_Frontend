@@ -5,7 +5,7 @@ import { of, Subject, throwError } from 'rxjs';
 
 import { EditTaskcardModalComponent } from './edit-taskcard-modal.component';
 import { BoardsService } from '../../services/boards.service';
-import { CardDetailsResponse } from '../../models/card-details.model';
+import { CardComment, CardDetailsResponse } from '../../models/card-details.model';
 
 describe('EditTaskcardModalComponent', () => {
   let component: EditTaskcardModalComponent;
@@ -20,7 +20,8 @@ describe('EditTaskcardModalComponent', () => {
   };
 
   beforeEach(async () => {
-    boardsService = jasmine.createSpyObj<BoardsService>('BoardsService', ['getTaskDetails', 'updateCard']);
+    boardsService = jasmine.createSpyObj<BoardsService>('BoardsService', ['getTaskDetails', 'updateCard', 'getComments', 'addComment']);
+    boardsService.getComments.and.returnValue(of([]));
     dialogRef = jasmine.createSpyObj<DialogRef>('DialogRef', ['close']);
 
     await TestBed.configureTestingModule({
@@ -296,6 +297,127 @@ describe('EditTaskcardModalComponent', () => {
       component.saveDescription();
 
       expect(boardsService.updateCard).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('comments', () => {
+    const older: CardComment = {
+      comment_id: 1, body: 'First comment', created_at: '2026-11-01T09:00:00.000Z', user_id: 1, author_name: 'Sam Lee'
+    };
+    const newer: CardComment = {
+      comment_id: 2, body: 'Second comment', created_at: '2026-11-02T09:00:00.000Z', user_id: 2, author_name: 'Ana Cruz'
+    };
+    const commentBox = () =>
+      fixture.nativeElement.querySelector('textarea[aria-label="Write a comment"]') as HTMLTextAreaElement | null;
+    const clickButton = (label: string) =>
+      (fixture.nativeElement.querySelector(`button[aria-label="${label}"]`) as HTMLButtonElement).click();
+    const type = (value: string) => {
+      commentBox()!.value = value;
+      commentBox()!.dispatchEvent(new Event('input'));
+    };
+    const commentBodies = () =>
+      Array.from(fixture.nativeElement.querySelectorAll('[data-testid="comment-body"]'))
+        .map(el => (el as HTMLElement).textContent?.trim());
+    const startWriting = () => {
+      fixture.detectChanges();
+      clickButton('Write a comment');
+      fixture.detectChanges();
+    };
+
+    beforeEach(() => {
+      boardsService.getTaskDetails.and.returnValue(of({ ...details }));
+    });
+
+    it('loads the comments for the card it was opened with', () => {
+      fixture.detectChanges();
+
+      expect(boardsService.getComments).toHaveBeenCalledOnceWith('9');
+    });
+
+    it('shows each comment with its author, in the order the API returns them', () => {
+      boardsService.getComments.and.returnValue(of([newer, older]));
+      fixture.detectChanges();
+
+      expect(commentBodies()).toEqual(['Second comment', 'First comment']);
+      expect(text()).toContain('Sam Lee');
+      expect(text()).toContain('Ana Cruz');
+    });
+
+    it('reports when the comments fail to load, but still shows the card', () => {
+      boardsService.getComments.and.returnValue(throwError(() => new Error('500')));
+      fixture.detectChanges();
+
+      expect(text()).toContain("Couldn't load comments.");
+      expect(titleBox().value).toBe('Buy milk');
+    });
+
+    it('opens the comment box from the placeholder', () => {
+      startWriting();
+
+      expect(commentBox()).not.toBeNull();
+    });
+
+    it('saves a trimmed comment, puts it at the top and closes the box', () => {
+      boardsService.getComments.and.returnValue(of([older]));
+      boardsService.addComment.and.returnValue(of(newer));
+      startWriting();
+
+      type('  Second comment  ');
+      clickButton('Save comment');
+      fixture.detectChanges();
+
+      expect(boardsService.addComment).toHaveBeenCalledOnceWith('9', 'Second comment');
+      expect(commentBodies()).toEqual(['Second comment', 'First comment']);
+      expect(commentBox()).toBeNull();
+    });
+
+    it('does not send a blank comment', () => {
+      startWriting();
+
+      type('   ');
+      clickButton('Save comment');
+
+      expect(boardsService.addComment).not.toHaveBeenCalled();
+    });
+
+    it('keeps the typed text and reports it when the save fails', () => {
+      boardsService.addComment.and.returnValue(throwError(() => new Error('500')));
+      startWriting();
+
+      type('Do not lose me');
+      clickButton('Save comment');
+      fixture.detectChanges();
+
+      expect(commentBox()?.value).toBe('Do not lose me');
+      expect(text()).toContain("Couldn't save the comment.");
+    });
+
+    it('sends one request when Save is clicked twice', () => {
+      boardsService.addComment.and.returnValue(new Subject<CardComment>());
+      startWriting();
+
+      type('Only once');
+      component.saveComment();
+      component.saveComment();
+
+      expect(boardsService.addComment).toHaveBeenCalledTimes(1);
+    });
+
+    it('Esc closes the comment box without closing the dialog', () => {
+      startWriting();
+      const reachedDocument = jasmine.createSpy('reachedDocument');
+      document.body.appendChild(fixture.nativeElement);
+      document.addEventListener('keydown', reachedDocument);
+
+      type('Never mind');
+      commentBox()!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      fixture.detectChanges();
+      document.removeEventListener('keydown', reachedDocument);
+      fixture.nativeElement.remove();
+
+      expect(commentBox()).toBeNull();
+      expect(reachedDocument).not.toHaveBeenCalled();
+      expect(boardsService.addComment).not.toHaveBeenCalled();
     });
   });
 

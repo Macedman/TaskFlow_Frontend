@@ -124,6 +124,34 @@ describe('BoardsService', () => {
     expect(result).toEqual(updated);
   });
 
+  it('getComments posts the cardId and returns the comments', () => {
+    const comments = [
+      { comment_id: 3, body: 'Done?', created_at: '2026-11-03T00:00:00.000Z', user_id: 1, author_name: 'Sam' }
+    ];
+    let result: unknown;
+    service.getComments('9').subscribe(list => (result = list));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/getComments`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ cardId: '9' });
+    req.flush(comments);
+
+    expect(result).toEqual(comments);
+  });
+
+  it('addComment posts the cardId and body and returns the saved comment', () => {
+    const saved = { comment_id: 4, body: 'Yes', created_at: '2026-11-03T00:00:00.000Z', user_id: 1, author_name: 'Sam' };
+    let result: unknown;
+    service.addComment('9', 'Yes').subscribe(comment => (result = comment));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/addComment`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ cardId: '9', body: 'Yes' });
+    req.flush(saved, { status: 201, statusText: 'Created' });
+
+    expect(result).toEqual(saved);
+  });
+
   it('addTask surfaces a 404 when the list is not accessible', () => {
     let status: number | undefined;
     service.addTask('999', 'Buy milk').subscribe({ error: err => (status = err.status) });
