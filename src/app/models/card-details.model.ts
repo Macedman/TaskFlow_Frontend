@@ -34,6 +34,19 @@ export interface CardComment {
   author_name: string;
 }
 
+// One attachment from POST /api/getAttachments or /api/addLinkAttachment. Only links exist so far;
+// PDFs will have a name and size_bytes instead of a url.
+export interface CardAttachment {
+  attachment_id: number;
+  kind: 'link' | 'pdf';
+  name: string | null; // a link's optional display text
+  url: string | null;
+  size_bytes: number | null;
+  created_at: string;
+  user_id: number;
+  author_name: string;
+}
+
 // Returned by POST /api/getTaskDetails. The ids are INTEGER columns, which pg returns as numbers.
 export interface CardDetailsResponse {
   card_id: number;

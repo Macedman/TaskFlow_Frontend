@@ -4,7 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { BoardsService } from '../../services/boards.service';
 import { OnInit } from '@angular/core';
-import { CardComment, CardDetails, CardDetailsResponse } from '../../models/card-details.model';
+import { CardAttachment, CardComment, CardDetails, CardDetailsResponse } from '../../models/card-details.model';
 
 @Component({
   selector: 'app-edit-taskcard-modal',
@@ -48,6 +48,16 @@ export class EditTaskcardModalComponent implements OnInit {
   commentDeleteErrorId = signal<number | null>(null);
   readonly editCommentInput = viewChild<ElementRef<HTMLTextAreaElement>>('editCommentInput');
 
+  attachments = signal<CardAttachment[]>([]);
+  attachmentsLoadError = signal(false);
+  linkUrlControl = new FormControl('');
+  linkNameControl = new FormControl('');
+  isAddingLink = signal(false);
+  isSavingLink = signal(false);
+  linkError = signal<'invalid' | 'failed' | null>(null);
+  attachmentDeleteErrorId = signal<number | null>(null);
+  readonly linkUrlInput = viewChild<ElementRef<HTMLInputElement>>('linkUrlInput');
+
   constructor(private boardsService: BoardsService) { }
 
   ngOnInit() {
@@ -69,6 +79,11 @@ export class EditTaskcardModalComponent implements OnInit {
     this.boardsService.getComments(this.data.cardId).subscribe({
       next: (comments) => this.comments.set(comments),
       error: () => this.commentsLoadError.set(true)
+    });
+
+    this.boardsService.getAttachments(this.data.cardId).subscribe({
+      next: (attachments) => this.attachments.set(attachments),
+      error: () => this.attachmentsLoadError.set(true)
     });
   }
 
@@ -241,6 +256,53 @@ export class EditTaskcardModalComponent implements OnInit {
     this.boardsService.deleteComment(comment.comment_id).subscribe({
       next: () => this.comments.update(comments => comments.filter(c => c.comment_id !== comment.comment_id)),
       error: () => this.commentDeleteErrorId.set(comment.comment_id)
+    });
+  }
+
+  startAddingLink() {
+    this.linkError.set(null);
+    this.isAddingLink.set(true);
+    setTimeout(() => this.linkUrlInput()?.nativeElement.focus());
+  }
+
+  cancelAddingLink(event?: Event) {
+    event?.stopPropagation(); //otherwise Esc also reaches the dialog and closes it
+    this.linkUrlControl.setValue('');
+    this.linkNameControl.setValue('');
+    this.isAddingLink.set(false);
+  }
+
+  saveLink() {
+    const url = this.linkUrlControl.value?.trim();
+    if (!url || this.isSavingLink()) return;
+
+    //the server decides what counts as a valid link; a 400 means it wasn't http or https
+    this.linkError.set(null);
+    this.isSavingLink.set(true);
+    this.boardsService.addLinkAttachment(this.data.cardId, url, this.linkNameControl.value ?? '').subscribe({
+      next: (attachment) => {
+        this.attachments.update(attachments => [attachment, ...attachments]); //newest first, like getAttachments
+        this.isSavingLink.set(false);
+        this.cancelAddingLink();
+      },
+      error: (err) => {
+        this.isSavingLink.set(false);
+        this.linkError.set(err?.status === 400 ? 'invalid' : 'failed');
+      }
+    });
+  }
+
+  canDeleteAttachment(attachment: CardAttachment) {
+    return attachment.user_id === this.currentUserId || this.card?.board_owner_id === this.currentUserId;
+  }
+
+  deleteAttachment(attachment: CardAttachment) {
+    if (!confirm("Delete this attachment? This can't be undone.")) return;
+
+    this.attachmentDeleteErrorId.set(null);
+    this.boardsService.deleteAttachment(attachment.attachment_id).subscribe({
+      next: () => this.attachments.update(list => list.filter(a => a.attachment_id !== attachment.attachment_id)),
+      error: () => this.attachmentDeleteErrorId.set(attachment.attachment_id)
     });
   }
 }

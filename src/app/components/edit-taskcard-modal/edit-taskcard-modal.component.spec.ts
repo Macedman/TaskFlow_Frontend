@@ -5,7 +5,7 @@ import { of, Subject, throwError } from 'rxjs';
 
 import { EditTaskcardModalComponent } from './edit-taskcard-modal.component';
 import { BoardsService } from '../../services/boards.service';
-import { CardComment, CardDetailsResponse } from '../../models/card-details.model';
+import { CardAttachment, CardComment, CardDetailsResponse } from '../../models/card-details.model';
 
 describe('EditTaskcardModalComponent', () => {
   let component: EditTaskcardModalComponent;
@@ -20,8 +20,10 @@ describe('EditTaskcardModalComponent', () => {
   };
 
   beforeEach(async () => {
-    boardsService = jasmine.createSpyObj<BoardsService>('BoardsService', ['getTaskDetails', 'updateCard', 'getComments', 'addComment', 'updateComment', 'deleteComment']);
+    boardsService = jasmine.createSpyObj<BoardsService>('BoardsService', ['getTaskDetails', 'updateCard', 'getComments', 'addComment', 'updateComment', 'deleteComment',
+      'getAttachments', 'addLinkAttachment', 'deleteAttachment']);
     boardsService.getComments.and.returnValue(of([]));
+    boardsService.getAttachments.and.returnValue(of([]));
     dialogRef = jasmine.createSpyObj<DialogRef>('DialogRef', ['close']);
 
     await TestBed.configureTestingModule({
@@ -76,7 +78,7 @@ describe('EditTaskcardModalComponent', () => {
     expect(emptyDescription()?.readOnly).toBeTrue();
   });
 
-  // There is no attachments API or card creator in the data yet, so none of this may be invented.
+  // The Attachments section only shows for real attachments, and there is no card creator in the data
   it('does not show placeholder attachments or a made-up author', () => {
     boardsService.getTaskDetails.and.returnValue(of(details));
     fixture.detectChanges();
@@ -574,6 +576,204 @@ describe('EditTaskcardModalComponent', () => {
         expect(commentBodies()).toEqual(['First comment']);
         expect(commentItem(1).textContent).toContain("Couldn't delete the comment.");
       });
+    });
+  });
+
+  describe('link attachments', () => {
+    // spec is by user 1, docs by user 2; details.board_owner_id is 5
+    const spec: CardAttachment = {
+      attachment_id: 1, kind: 'link', name: 'The spec', url: 'https://example.com/spec', size_bytes: null,
+      created_at: '2026-11-01T09:00:00.000Z', user_id: 1, author_name: 'Sam Lee'
+    };
+    const docs: CardAttachment = {
+      attachment_id: 2, kind: 'link', name: null, url: 'https://docs.example.com/', size_bytes: null,
+      created_at: '2026-11-02T09:00:00.000Z', user_id: 2, author_name: 'Ana Cruz'
+    };
+    const links = () =>
+      Array.from(fixture.nativeElement.querySelectorAll('[data-testid="attachment-link"]')) as HTMLAnchorElement[];
+    const attachmentItem = (id: number) =>
+      fixture.nativeElement.querySelector(`[data-attachment-id="${id}"]`) as HTMLElement;
+    const deleteButtonIn = (id: number) =>
+      attachmentItem(id).querySelector('button[aria-label="Delete attachment"]') as HTMLButtonElement | null;
+    const field = (label: string) =>
+      fixture.nativeElement.querySelector(`input[aria-label="${label}"]`) as HTMLInputElement | null;
+    const fill = (label: string, value: string) => {
+      field(label)!.value = value;
+      field(label)!.dispatchEvent(new Event('input'));
+    };
+    const clickButton = (label: string) =>
+      (fixture.nativeElement.querySelector(`button[aria-label="${label}"]`) as HTMLButtonElement).click();
+    const open = (attachments: CardAttachment[]) => {
+      boardsService.getAttachments.and.returnValue(of(attachments.map(a => ({ ...a }))));
+      fixture.detectChanges();
+    };
+    const startAttaching = () => {
+      clickButton('Add attachment');
+      fixture.detectChanges();
+    };
+
+    let savedUser: string | null;
+    beforeEach(() => {
+      boardsService.getTaskDetails.and.returnValue(of({ ...details }));
+      savedUser = localStorage.getItem('user');
+      localStorage.setItem('user', JSON.stringify({ id: 1 }));
+    });
+    afterEach(() => {
+      if (savedUser === null) localStorage.removeItem('user');
+      else localStorage.setItem('user', savedUser);
+    });
+
+    it('loads the attachments for the card it was opened with', () => {
+      open([]);
+
+      expect(boardsService.getAttachments).toHaveBeenCalledOnceWith('9');
+    });
+
+    it('lists each link in a new tab, showing its display text or else its address', () => {
+      open([docs, spec]);
+
+      expect(text()).toContain('Attachments');
+      expect(links().map(a => a.textContent?.trim())).toEqual(['https://docs.example.com/', 'The spec']);
+      expect(links()[1].href).toBe('https://example.com/spec');
+      expect(links()[1].target).toBe('_blank');
+      // the opened page must not get a handle back to this tab
+      expect(links()[1].rel).toContain('noopener');
+    });
+
+    it('reports when the attachments fail to load, but still shows the card', () => {
+      boardsService.getAttachments.and.returnValue(throwError(() => new Error('500')));
+      fixture.detectChanges();
+
+      expect(text()).toContain("Couldn't load attachments.");
+      expect(titleBox().value).toBe('Buy milk');
+    });
+
+    it('attaches a link and puts it at the top', () => {
+      boardsService.addLinkAttachment.and.returnValue(of({ ...docs }));
+      open([spec]);
+      startAttaching();
+
+      fill('Link URL', '  https://docs.example.com  ');
+      fill('Link display text', '');
+      clickButton('Attach link');
+      fixture.detectChanges();
+
+      expect(boardsService.addLinkAttachment).toHaveBeenCalledOnceWith('9', 'https://docs.example.com', '');
+      expect(links().map(a => a.textContent?.trim())).toEqual(['https://docs.example.com/', 'The spec']);
+      expect(field('Link URL')).toBeNull();
+    });
+
+    it('does not send an empty link', () => {
+      open([]);
+      startAttaching();
+
+      fill('Link URL', '   ');
+      clickButton('Attach link');
+
+      expect(boardsService.addLinkAttachment).not.toHaveBeenCalled();
+    });
+
+    it('explains a rejected link and keeps what was typed', () => {
+      boardsService.addLinkAttachment.and.returnValue(throwError(() => ({ status: 400 })));
+      open([]);
+      startAttaching();
+
+      fill('Link URL', 'javascript:alert(1)');
+      clickButton('Attach link');
+      fixture.detectChanges();
+
+      expect(text()).toContain('Enter a link that starts with http:// or https://.');
+      expect(field('Link URL')?.value).toBe('javascript:alert(1)');
+    });
+
+    it('reports other failures and keeps what was typed', () => {
+      boardsService.addLinkAttachment.and.returnValue(throwError(() => ({ status: 500 })));
+      open([]);
+      startAttaching();
+
+      fill('Link URL', 'https://example.com');
+      clickButton('Attach link');
+      fixture.detectChanges();
+
+      expect(text()).toContain("Couldn't attach the link.");
+      expect(field('Link URL')?.value).toBe('https://example.com');
+    });
+
+    it('sends one request when Attach is clicked twice', () => {
+      boardsService.addLinkAttachment.and.returnValue(new Subject<CardAttachment>());
+      open([]);
+      startAttaching();
+
+      fill('Link URL', 'https://example.com');
+      component.saveLink();
+      component.saveLink();
+
+      expect(boardsService.addLinkAttachment).toHaveBeenCalledTimes(1);
+    });
+
+    it('Esc closes the form without closing the dialog', () => {
+      open([]);
+      startAttaching();
+      const reachedDocument = jasmine.createSpy('reachedDocument');
+      document.body.appendChild(fixture.nativeElement);
+      document.addEventListener('keydown', reachedDocument);
+
+      fill('Link URL', 'https://example.com');
+      field('Link URL')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      fixture.detectChanges();
+      document.removeEventListener('keydown', reachedDocument);
+      fixture.nativeElement.remove();
+
+      expect(field('Link URL')).toBeNull();
+      expect(reachedDocument).not.toHaveBeenCalled();
+      expect(boardsService.addLinkAttachment).not.toHaveBeenCalled();
+    });
+
+    it('shows Delete to the uploader and the board owner only', () => {
+      open([docs, spec]);
+      expect(deleteButtonIn(1)).not.toBeNull();
+      expect(deleteButtonIn(2)).toBeNull();
+    });
+
+    it('lets the board owner delete anyone\'s attachment', () => {
+      localStorage.setItem('user', JSON.stringify({ id: 5 }));
+      open([docs, spec]);
+
+      expect(deleteButtonIn(1)).not.toBeNull();
+      expect(deleteButtonIn(2)).not.toBeNull();
+    });
+
+    it('deletes an attachment after confirming', () => {
+      spyOn(window, 'confirm').and.returnValue(true);
+      boardsService.deleteAttachment.and.returnValue(of({ attachment_id: 1 }));
+      open([docs, spec]);
+
+      deleteButtonIn(1)!.click();
+      fixture.detectChanges();
+
+      expect(boardsService.deleteAttachment).toHaveBeenCalledOnceWith(1);
+      expect(links().length).toBe(1);
+    });
+
+    it('does nothing when the delete is not confirmed', () => {
+      spyOn(window, 'confirm').and.returnValue(false);
+      open([spec]);
+
+      deleteButtonIn(1)!.click();
+
+      expect(boardsService.deleteAttachment).not.toHaveBeenCalled();
+    });
+
+    it('keeps the attachment and reports it when the delete fails', () => {
+      spyOn(window, 'confirm').and.returnValue(true);
+      boardsService.deleteAttachment.and.returnValue(throwError(() => new Error('500')));
+      open([spec]);
+
+      deleteButtonIn(1)!.click();
+      fixture.detectChanges();
+
+      expect(links().length).toBe(1);
+      expect(attachmentItem(1).textContent).toContain("Couldn't delete the attachment.");
     });
   });
 
