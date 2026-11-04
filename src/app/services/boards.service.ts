@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ListType } from '../models/list.model';
 import { Board } from '../models/boards.model';
@@ -66,6 +66,22 @@ export class BoardsService {
   // The server only accepts http/https links and answers 400 for anything else.
   addLinkAttachment(cardId: string, url: string, name: string): Observable<CardAttachment> {
     return this.http.post<CardAttachment>(`${environment.apiUrl}/api/addLinkAttachment`, { cardId, url, name });
+  }
+
+  // Sent as form data, not JSON; the server checks it really is a PDF and at most 10 MB.
+  uploadPdfAttachment(cardId: string, file: File): Observable<CardAttachment> {
+    const form = new FormData();
+    form.append('cardId', cardId);
+    form.append('file', file);
+    return this.http.post<CardAttachment>(`${environment.apiUrl}/api/uploadPdfAttachment`, form);
+  }
+
+  // A link that works for a few minutes. Local storage answers with a path on the API and
+  // cloud storage with a full URL, so resolve it against the API either way.
+  getAttachmentDownloadUrl(attachmentId: number): Observable<string> {
+    return this.http
+      .post<{ url: string }>(`${environment.apiUrl}/api/getAttachmentDownloadUrl`, { attachmentId })
+      .pipe(map(({ url }) => new URL(url, environment.apiUrl).href));
   }
 
   // The uploader or the board owner can delete.

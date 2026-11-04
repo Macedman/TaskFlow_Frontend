@@ -6,6 +6,9 @@ import { BoardsService } from '../../services/boards.service';
 import { OnInit } from '@angular/core';
 import { CardAttachment, CardComment, CardDetails, CardDetailsResponse } from '../../models/card-details.model';
 
+// Same limit as the server's
+const MAX_PDF_BYTES = 10 * 1024 * 1024;
+
 @Component({
   selector: 'app-edit-taskcard-modal',
   imports: [DatePipe, ReactiveFormsModule],
@@ -56,6 +59,9 @@ export class EditTaskcardModalComponent implements OnInit {
   isSavingLink = signal(false);
   linkError = signal<'invalid' | 'failed' | null>(null);
   attachmentDeleteErrorId = signal<number | null>(null);
+  isUploadingPdf = signal(false);
+  pdfError = signal<'too-big' | 'not-pdf' | 'failed' | null>(null);
+  attachmentDownloadErrorId = signal<number | null>(null);
   readonly linkUrlInput = viewChild<ElementRef<HTMLInputElement>>('linkUrlInput');
 
   constructor(private boardsService: BoardsService) { }
@@ -261,6 +267,7 @@ export class EditTaskcardModalComponent implements OnInit {
 
   startAddingLink() {
     this.linkError.set(null);
+    this.pdfError.set(null);
     this.isAddingLink.set(true);
     setTimeout(() => this.linkUrlInput()?.nativeElement.focus());
   }
@@ -290,6 +297,58 @@ export class EditTaskcardModalComponent implements OnInit {
         this.linkError.set(err?.status === 400 ? 'invalid' : 'failed');
       }
     });
+  }
+
+  onPdfChosen(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = ''; //so choosing the same file again still fires a change
+    if (!file || this.isUploadingPdf()) return;
+
+    //checked here for instant feedback; the server checks both again since this is easy to bypass
+    this.pdfError.set(null);
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      this.pdfError.set('not-pdf');
+      return;
+    }
+    if (file.size > MAX_PDF_BYTES) {
+      this.pdfError.set('too-big');
+      return;
+    }
+
+    this.isUploadingPdf.set(true);
+    this.boardsService.uploadPdfAttachment(this.data.cardId, file).subscribe({
+      next: (attachment) => {
+        this.attachments.update(attachments => [attachment, ...attachments]);
+        this.isUploadingPdf.set(false);
+        this.cancelAddingLink();
+      },
+      error: (err) => {
+        this.isUploadingPdf.set(false);
+        this.pdfError.set(err?.status === 400 ? 'not-pdf' : err?.status === 413 ? 'too-big' : 'failed');
+      }
+    });
+  }
+
+  downloadAttachment(attachment: CardAttachment) {
+    //links expire after a few minutes, so ask for a fresh one on every click
+    this.attachmentDownloadErrorId.set(null);
+    this.boardsService.getAttachmentDownloadUrl(attachment.attachment_id).subscribe({
+      next: (url) => this.startDownload(url),
+      error: () => this.attachmentDownloadErrorId.set(attachment.attachment_id)
+    });
+  }
+
+  //the server answers with Content-Disposition: attachment, so the browser saves the file and stays here
+  startDownload(url: string) {
+    window.location.assign(url);
+  }
+
+  formatSize(bytes: number | null) {
+    if (bytes === null) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   canDeleteAttachment(attachment: CardAttachment) {

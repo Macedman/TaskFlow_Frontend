@@ -34,8 +34,8 @@ export interface CardComment {
   author_name: string;
 }
 
-// One attachment from POST /api/getAttachments or /api/addLinkAttachment. Only links exist so far;
-// PDFs will have a name and size_bytes instead of a url.
+// One attachment from POST /api/getAttachments, /api/addLinkAttachment or /api/uploadPdfAttachment.
+// A link has a url; a PDF has a name and size_bytes instead, and is downloaded via getAttachmentDownloadUrl.
 export interface CardAttachment {
   attachment_id: number;
   kind: 'link' | 'pdf';

@@ -189,7 +189,7 @@
           </div>
           @if (isAddingLink()) {
             <div class="ml-[28px] mt-3 max-w-[420px] rounded-lg border-1 border-(--modal-border) p-3 text-[14px]">
-              <h4 class="font-[600] mb-2">Attach a link</h4>
+              <h4 class="font-[600] mb-2">Attach a link or PDF</h4>
               <label class="block text-[12px] text-(--modal-muted) mb-1" for="link-url">Paste a link</label>
               <input
                 #linkUrlInput
@@ -237,6 +237,34 @@
                   Cancel
                 </button>
               </div>
+
+              <div class="flex items-center gap-2 my-3 text-[12px] text-(--modal-muted)">
+                <span class="flex-1 border-t-1 border-(--modal-border)"></span>or<span class="flex-1 border-t-1 border-(--modal-border)"></span>
+              </div>
+              <!-- accept only narrows the file picker; the type and size are checked in code too -->
+              <label
+                class="inline-block rounded border-1 border-(--modal-border) font-[500] p-[6px_12px] cursor-pointer text-(--modal-muted) hover:bg-(--modal-control) focus-within:border-[#0C66E4]"
+                [class.opacity-50]="isUploadingPdf()"
+              >
+                {{ isUploadingPdf() ? 'Uploading...' : 'Upload a PDF' }}
+                <input
+                  type="file"
+                  class="sr-only"
+                  accept=".pdf,application/pdf"
+                  aria-label="Upload a PDF"
+                  [disabled]="isUploadingPdf()"
+                  (change)="onPdfChosen($event)"
+                  (keydown.escape)="cancelAddingLink($event)"
+                />
+              </label>
+              <span class="ml-2 text-[12px] text-(--modal-muted)">Up to 10 MB</span>
+              @if (pdfError() === 'too-big') {
+                <p class="text-red-400 text-[14px] mt-2" role="alert">PDFs can be up to 10 MB.</p>
+              } @else if (pdfError() === 'not-pdf') {
+                <p class="text-red-400 text-[14px] mt-2" role="alert">Only PDF files can be attached.</p>
+              } @else if (pdfError() === 'failed') {
+                <p class="text-red-400 text-[14px] mt-2" role="alert">Couldn't upload the file.</p>
+              }
             </div>
           }
         </section>
@@ -335,14 +363,25 @@
             <ul class="col-start-2 flex flex-col gap-3">
               @for (attachment of attachments(); track attachment.attachment_id) {
                 <li class="text-[14px]" [attr.data-attachment-id]="attachment.attachment_id">
-                  <!-- noopener: the opened page gets no handle back to this tab -->
-                  <a
-                    class="font-[500] text-(--modal-link) hover:underline break-all"
-                    data-testid="attachment-link"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    [href]="attachment.url"
-                  >{{ attachment.name || attachment.url }}</a>
+                  @if (attachment.kind === 'pdf') {
+                    <!-- a button, not a link: each click fetches a fresh short-lived download link -->
+                    <button
+                      type="button"
+                      class="font-[500] text-(--modal-link) hover:underline break-all cursor-pointer text-left"
+                      data-testid="attachment-file"
+                      (click)="downloadAttachment(attachment)"
+                    >{{ attachment.name }}</button>
+                    <span class="text-[12px] text-(--modal-muted) ml-1">· PDF, {{ formatSize(attachment.size_bytes) }}</span>
+                  } @else {
+                    <!-- noopener: the opened page gets no handle back to this tab -->
+                    <a
+                      class="font-[500] text-(--modal-link) hover:underline break-all"
+                      data-testid="attachment-link"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      [href]="attachment.url"
+                    >{{ attachment.name || attachment.url }}</a>
+                  }
                   <div class="flex gap-2 text-[12px] text-(--modal-muted)">
                     <span>Added by {{ attachment.author_name }}, {{ attachment.created_at | date: 'MMM d, y, h:mm a' }}</span>
                     @if (canDeleteAttachment(attachment)) {
@@ -356,6 +395,9 @@
                   </div>
                   @if (attachmentDeleteErrorId() === attachment.attachment_id) {
                     <p class="text-red-400 text-[14px] mt-1" role="alert">Couldn't delete the attachment.</p>
+                  }
+                  @if (attachmentDownloadErrorId() === attachment.attachment_id) {
+                    <p class="text-red-400 text-[14px] mt-1" role="alert">Couldn't download the file.</p>
                   }
                 </li>
               }

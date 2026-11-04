@@ -21,7 +21,7 @@ describe('EditTaskcardModalComponent', () => {
 
   beforeEach(async () => {
     boardsService = jasmine.createSpyObj<BoardsService>('BoardsService', ['getTaskDetails', 'updateCard', 'getComments', 'addComment', 'updateComment', 'deleteComment',
-      'getAttachments', 'addLinkAttachment', 'deleteAttachment']);
+      'getAttachments', 'addLinkAttachment', 'deleteAttachment', 'uploadPdfAttachment', 'getAttachmentDownloadUrl']);
     boardsService.getComments.and.returnValue(of([]));
     boardsService.getAttachments.and.returnValue(of([]));
     dialogRef = jasmine.createSpyObj<DialogRef>('DialogRef', ['close']);
@@ -774,6 +774,118 @@ describe('EditTaskcardModalComponent', () => {
 
       expect(links().length).toBe(1);
       expect(attachmentItem(1).textContent).toContain("Couldn't delete the attachment.");
+    });
+  });
+
+  describe('PDF attachments', () => {
+    const report: CardAttachment = {
+      attachment_id: 7, kind: 'pdf', name: 'report.pdf', url: null, size_bytes: 2 * 1024 * 1024,
+      created_at: '2026-11-03T09:00:00.000Z', user_id: 1, author_name: 'Sam Lee'
+    };
+    const fileButton = () =>
+      fixture.nativeElement.querySelector('button[data-testid="attachment-file"]') as HTMLButtonElement | null;
+    const fileInput = () =>
+      fixture.nativeElement.querySelector('input[type="file"][aria-label="Upload a PDF"]') as HTMLInputElement | null;
+    const choose = (file: File) => {
+      const picked = new DataTransfer();
+      picked.items.add(file);
+      fileInput()!.files = picked.files;
+      fileInput()!.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+    };
+    const pdf = (name = 'notes.pdf', bytes = 100) =>
+      new File([new Uint8Array(bytes)], name, { type: 'application/pdf' });
+    const open = (attachments: CardAttachment[]) => {
+      boardsService.getAttachments.and.returnValue(of(attachments.map(a => ({ ...a }))));
+      fixture.detectChanges();
+    };
+    const startAttaching = () => {
+      (fixture.nativeElement.querySelector('button[aria-label="Add attachment"]') as HTMLButtonElement).click();
+      fixture.detectChanges();
+    };
+
+    beforeEach(() => {
+      boardsService.getTaskDetails.and.returnValue(of({ ...details }));
+    });
+
+    it('shows a PDF with its name and size', () => {
+      open([report]);
+
+      expect(fileButton()?.textContent?.trim()).toBe('report.pdf');
+      expect(text()).toContain('2.0 MB');
+    });
+
+    it('downloads a PDF through a short-lived link', () => {
+      boardsService.getAttachmentDownloadUrl.and.returnValue(of('http://localhost:5001/api/files/abc'));
+      open([report]);
+      const startDownload = spyOn(component, 'startDownload');
+
+      fileButton()!.click();
+
+      expect(boardsService.getAttachmentDownloadUrl).toHaveBeenCalledOnceWith(7);
+      expect(startDownload).toHaveBeenCalledOnceWith('http://localhost:5001/api/files/abc');
+    });
+
+    it('reports when the download link cannot be fetched', () => {
+      boardsService.getAttachmentDownloadUrl.and.returnValue(throwError(() => new Error('500')));
+      open([report]);
+      spyOn(component, 'startDownload');
+
+      fileButton()!.click();
+      fixture.detectChanges();
+
+      expect(component.startDownload).not.toHaveBeenCalled();
+      expect(text()).toContain("Couldn't download the file.");
+    });
+
+    it('uploads a chosen PDF, puts it at the top and closes the form', () => {
+      boardsService.uploadPdfAttachment.and.returnValue(of({ ...report }));
+      open([]);
+      startAttaching();
+
+      const file = pdf('report.pdf');
+      choose(file);
+
+      expect(boardsService.uploadPdfAttachment).toHaveBeenCalledOnceWith('9', file);
+      expect(fileButton()?.textContent?.trim()).toBe('report.pdf');
+      expect(fileInput()).toBeNull();
+    });
+
+    it('refuses a file over 10 MB without uploading it', () => {
+      open([]);
+      startAttaching();
+
+      choose(pdf('huge.pdf', 10 * 1024 * 1024 + 1));
+
+      expect(boardsService.uploadPdfAttachment).not.toHaveBeenCalled();
+      expect(text()).toContain('PDFs can be up to 10 MB.');
+    });
+
+    it('refuses a file that is not a PDF without uploading it', () => {
+      open([]);
+      startAttaching();
+
+      choose(new File(['hello'], 'notes.txt', { type: 'text/plain' }));
+
+      expect(boardsService.uploadPdfAttachment).not.toHaveBeenCalled();
+      expect(text()).toContain('Only PDF files can be attached.');
+    });
+
+    it('explains what the server rejected', () => {
+      open([]);
+      startAttaching();
+
+      boardsService.uploadPdfAttachment.and.returnValue(throwError(() => ({ status: 400 })));
+      choose(pdf('fake.pdf'));
+      expect(text()).toContain('Only PDF files can be attached.');
+
+      boardsService.uploadPdfAttachment.and.returnValue(throwError(() => ({ status: 413 })));
+      choose(pdf('big.pdf'));
+      expect(text()).toContain('PDFs can be up to 10 MB.');
+
+      boardsService.uploadPdfAttachment.and.returnValue(throwError(() => ({ status: 500 })));
+      choose(pdf('ok.pdf'));
+      expect(text()).toContain("Couldn't upload the file.");
     });
   });
 

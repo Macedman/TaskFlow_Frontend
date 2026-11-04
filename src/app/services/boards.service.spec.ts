@@ -214,6 +214,40 @@ describe('BoardsService', () => {
     req.flush({ attachment_id: 3 });
   });
 
+  it('uploadPdfAttachment sends the cardId and file as form data', () => {
+    const file = new File(['%PDF-1.4'], 'spec.pdf', { type: 'application/pdf' });
+    service.uploadPdfAttachment('9', file).subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/uploadPdfAttachment`);
+    expect(req.request.method).toBe('POST');
+    const body = req.request.body as FormData;
+    expect(body instanceof FormData).toBeTrue();
+    expect(body.get('cardId')).toBe('9');
+    expect((body.get('file') as File).name).toBe('spec.pdf');
+    req.flush({}, { status: 201, statusText: 'Created' });
+  });
+
+  it('getAttachmentDownloadUrl turns a relative link into a full one', () => {
+    let result: string | undefined;
+    service.getAttachmentDownloadUrl(3).subscribe(url => (result = url));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/getAttachmentDownloadUrl`);
+    expect(req.request.body).toEqual({ attachmentId: 3 });
+    req.flush({ url: '/api/files/abc' });
+
+    expect(result).toBe(new URL('/api/files/abc', environment.apiUrl).href);
+  });
+
+  it('getAttachmentDownloadUrl leaves a full link (cloud storage) as it is', () => {
+    let result: string | undefined;
+    service.getAttachmentDownloadUrl(3).subscribe(url => (result = url));
+
+    httpMock.expectOne(`${environment.apiUrl}/api/getAttachmentDownloadUrl`)
+      .flush({ url: 'https://files.example.com/abc?sig=1' });
+
+    expect(result).toBe('https://files.example.com/abc?sig=1');
+  });
+
   it('addTask surfaces a 404 when the list is not accessible', () => {
     let status: number | undefined;
     service.addTask('999', 'Buy milk').subscribe({ error: err => (status = err.status) });
