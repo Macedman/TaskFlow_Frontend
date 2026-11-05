@@ -89,6 +89,12 @@ export class BoardsService {
     return this.http.post<{ attachment_id: number }>(`${environment.apiUrl}/api/deleteAttachment`, { attachmentId });
   }
 
+  // position is the card's index in the target list after the move; the server renumbers both lists.
+  moveCard(cardId: string, listId: string, position: number): Observable<{ card_id: number; list_id: number; position: number }> {
+    return this.http.post<{ card_id: number; list_id: number; position: number }>(
+      `${environment.apiUrl}/api/moveCard`, { cardId, listId, position });
+  }
+
   // Returns the raw cards row; callers map it to the Card shape the board uses.
   addTask(listId: string, title: string): Observable<NewCardResponse> {
     return this.http.post<NewCardResponse>(`${environment.apiUrl}/api/addTask`, { listId, title });

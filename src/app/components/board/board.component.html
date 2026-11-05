@@ -2,6 +2,9 @@
   <app-navbar class="navbar"></app-navbar>
   <!-- <app-sidebar class="sidebar"></app-sidebar> -->
   <div class="main mt-3 ml-3">
+    @if (moveError()) {
+      <p class="mb-3 text-red-400 text-[14px]" role="alert">Couldn't save the card's new position. The board was reloaded.</p>
+    }
     <div class="flex flex-row gap-5">
       <div class="flex flex-row gap-5" cdkDropListGroup>
         @for (list of lists; track list.listId) {

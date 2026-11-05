@@ -248,6 +248,18 @@ describe('BoardsService', () => {
     expect(result).toBe('https://files.example.com/abc?sig=1');
   });
 
+  it('moveCard posts the card, its target list and its index there', () => {
+    let result: unknown;
+    service.moveCard('11', '2', 0).subscribe(res => (result = res));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/moveCard`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ cardId: '11', listId: '2', position: 0 });
+    req.flush({ card_id: 11, list_id: 2, position: 0 });
+
+    expect(result).toEqual({ card_id: 11, list_id: 2, position: 0 });
+  });
+
   it('addTask surfaces a 404 when the list is not accessible', () => {
     let status: number | undefined;
     service.addTask('999', 'Buy milk').subscribe({ error: err => (status = err.status) });
