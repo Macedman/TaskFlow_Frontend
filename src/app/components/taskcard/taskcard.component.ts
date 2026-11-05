@@ -27,8 +27,6 @@ export class TaskcardComponent implements OnInit {
   
   ngOnInit() {
     this.cardTitle = this.card.card_title;
-    console.log('Card Title:', this.cardTitle);
-    console.log('Card Details:', this.card);
   }
 
   openDialog() {
@@ -42,10 +40,6 @@ export class TaskcardComponent implements OnInit {
     dialogRef.componentInstance?.titleChanged.subscribe(title => {
       this.card.card_title = title;
       this.cardTitle = title;
-    });
-
-    dialogRef.closed.subscribe(result => {
-      console.log('The dialog was closed', result);
     });
   }
 }

@@ -48,13 +48,11 @@ getTasks() {
   this.route.paramMap.subscribe(params => {
   const boardId = params.get('boardId');
 
-  console.log('Board ID from route:', boardId);
 
   if (boardId) {
   this.boardId = boardId;
   this.boardService.getTasks(boardId).subscribe((response) => {
   this.lists = response;
-  console.log('Fetched lists:', this.lists);
 })
   }
 });
