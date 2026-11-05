@@ -3,10 +3,11 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 
 import { BoardComponent } from './board.component';
 import { BoardsService } from '../../services/boards.service';
+import { BoardEventsService } from '../../services/board-events.service';
 import { ListType } from '../../models/list.model';
 import { Card } from '../../models/card-details.model';
 
@@ -14,6 +15,9 @@ describe('BoardComponent', () => {
   let component: BoardComponent;
   let fixture: ComponentFixture<BoardComponent>;
   let boardsService: jasmine.SpyObj<BoardsService>;
+  let boardEvents: jasmine.SpyObj<BoardEventsService>;
+  // stands in for the socket: next() means "someone else changed this board"
+  let changedElsewhere: Subject<void>;
 
   // To Do = a0, a1, a2 and Doing = b0, as the server returns them
   const serverLists = (): ListType[] => [
@@ -27,12 +31,16 @@ describe('BoardComponent', () => {
     boardsService = jasmine.createSpyObj<BoardsService>('BoardsService', ['getTasks', 'moveCard', 'getBoards']);
     boardsService.getTasks.and.callFake(() => of(serverLists()));
     boardsService.getBoards.and.returnValue(of([]));
+    changedElsewhere = new Subject<void>();
+    boardEvents = jasmine.createSpyObj<BoardEventsService>('BoardEventsService', ['boardChanges']);
+    boardEvents.boardChanges.and.returnValue(changedElsewhere);
 
     await TestBed.configureTestingModule({
       imports: [BoardComponent],
       providers: [
         provideHttpClient(), provideHttpClientTesting(), provideRouter([]),
         { provide: BoardsService, useValue: boardsService },
+        { provide: BoardEventsService, useValue: boardEvents },
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ boardId: '42' })) } },
       ]
     })
@@ -109,5 +117,73 @@ describe('BoardComponent', () => {
     fixture.detectChanges();
 
     expect(text()).not.toContain("Couldn't save the card's new position.");
+  });
+
+  describe('live updates', () => {
+    // pretend the server now has b0 first in To Do, so a reload is visible
+    const serverMovedB0 = () => boardsService.getTasks.and.callFake(() => of([
+      { listId: '1', listName: 'To Do', cards: [{ card_id: '20', card_title: 'b0' }] },
+      { listId: '2', listName: 'Doing', cards: [] },
+    ]));
+
+    it('listens for changes to the board in the route', () => {
+      expect(boardEvents.boardChanges).toHaveBeenCalledOnceWith('42');
+    });
+
+    it('reloads the board when it changes elsewhere', () => {
+      serverMovedB0();
+
+      changedElsewhere.next();
+
+      expect(boardsService.getTasks).toHaveBeenCalledTimes(2);
+      expect(titles('To Do')).toEqual(['b0']);
+    });
+
+    it('waits until the drop when a change arrives mid-drag', () => {
+      const placeholder = document.createElement('div');
+      placeholder.className = 'cdk-drag-placeholder'; // what CDK shows while a card is dragged
+      fixture.nativeElement.appendChild(placeholder);
+
+      changedElsewhere.next();
+      expect(boardsService.getTasks).toHaveBeenCalledTimes(1);
+
+      placeholder.remove();
+      drop('To Do', 'To Do', 1, 1); // put back where it was
+      expect(boardsService.getTasks).toHaveBeenCalledTimes(2);
+    });
+
+    it('waits for our own move to be saved before reloading', () => {
+      const saving = new Subject<{ card_id: number; list_id: number; position: number }>();
+      boardsService.moveCard.and.returnValue(saving);
+      drop('To Do', 'To Do', 0, 2);
+
+      changedElsewhere.next();
+      expect(boardsService.getTasks).toHaveBeenCalledTimes(1);
+
+      saving.next({ card_id: 10, list_id: 1, position: 2 });
+      saving.complete();
+      expect(boardsService.getTasks).toHaveBeenCalledTimes(2);
+    });
+
+    it('applies only the newest reload when two overlap', () => {
+      const first = new Subject<ListType[]>();
+      const second = new Subject<ListType[]>();
+      boardsService.getTasks.and.returnValues(first, second);
+
+      changedElsewhere.next();
+      changedElsewhere.next();
+      second.next([{ listId: '1', listName: 'Newest', cards: [] }]);
+      first.next([{ listId: '1', listName: 'Stale', cards: [] }]);
+
+      expect(component.lists.map(l => l.listName)).toEqual(['Newest']);
+    });
+
+    it('stops listening when the board is closed', () => {
+      expect(changedElsewhere.observed).toBeTrue();
+
+      fixture.destroy();
+
+      expect(changedElsewhere.observed).toBeFalse();
+    });
   });
 });
