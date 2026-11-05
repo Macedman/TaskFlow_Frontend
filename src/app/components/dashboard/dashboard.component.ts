@@ -28,7 +28,6 @@ export class DashboardComponent {
 //Transfer this to dashboard component, this is not the right place to get boards
 getBoards() {
   this.boardService.getBoards().subscribe((response) => {
-    console.log('Boards:', response);
     this.boards = response;
   });
 }
@@ -36,7 +35,6 @@ getBoards() {
 click (board: Board) {
   //go to board page
   //Add a route to the board page and pass the board id as a 
-  console.log('Board ID:', board.id);
   this.router.navigate(['/board', board.id]);
 }
 

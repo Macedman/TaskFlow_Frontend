@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, Output, EventEmitter, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, Input, Output, EventEmitter, signal, viewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TaskcardComponent } from '../taskcard/taskcard.component';
 import { CommonModule } from '@angular/common';
@@ -14,7 +14,7 @@ import { BoardsService } from '../../services/boards.service';
   templateUrl: './list.component.html',
   styleUrl: './list.component.css'
 })
-export class ListComponent implements OnInit {
+export class ListComponent {
   @Input() listId: string = '';
   @Input() listTitle: string = '';
   @Input() cards: Card[] = [];
@@ -61,17 +61,10 @@ export class ListComponent implements OnInit {
 
   onDrop(event: CdkDragDrop<Card[]>) {
     this.dropped.emit(event)
-    console.log('List onDrop event:', event);
   }
 
   //push in place: cards is the same array the board and cdkDropList hold, a new array would split them
   onCardAdded(card: NewCardResponse) {
     this.cards.push({ card_id: card.id, card_title: card.title });
-  }
-
-
-  ngOnInit() {
-    console.log('List Component - List Title:', this.listTitle);
-    console.log('List Component - Cards:', this.cards);
   }
 }

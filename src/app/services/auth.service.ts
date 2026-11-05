@@ -42,13 +42,11 @@ export class AuthService {
 
       try {
         const decoded = this.decodeToken(token);
-        console.log('Decoded Token:', decoded);
         if (!decoded || !decoded.exp) {
           return true;
         }
 
         const currentTime = Math.floor(Date.now() / 1000);
-        console.log('Current Time:', currentTime, 'Token Expiration Time:', decoded.exp);
         return decoded.exp < currentTime;
       } catch (error) {
         console.error('Error decoding token:', error);
