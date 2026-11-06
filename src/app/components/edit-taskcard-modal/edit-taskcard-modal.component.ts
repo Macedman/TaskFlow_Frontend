@@ -7,7 +7,7 @@ import { OnInit } from '@angular/core';
 import { CardAttachment, CardComment, CardDetails, CardDetailsResponse } from '../../models/card-details.model';
 
 // Same limit as the server's
-const MAX_PDF_BYTES = 10 * 1024 * 1024;
+const MAX_PDF_BYTES = 5 * 1024 * 1024;
 
 @Component({
   selector: 'app-edit-taskcard-modal',
@@ -60,7 +60,7 @@ export class EditTaskcardModalComponent implements OnInit {
   linkError = signal<'invalid' | 'failed' | null>(null);
   attachmentDeleteErrorId = signal<number | null>(null);
   isUploadingPdf = signal(false);
-  pdfError = signal<'too-big' | 'not-pdf' | 'failed' | null>(null);
+  pdfError = signal<'too-big' | 'not-pdf' | 'storage-full' | 'failed' | null>(null);
   attachmentDownloadErrorId = signal<number | null>(null);
   readonly linkUrlInput = viewChild<ElementRef<HTMLInputElement>>('linkUrlInput');
 
@@ -325,7 +325,9 @@ export class EditTaskcardModalComponent implements OnInit {
       },
       error: (err) => {
         this.isUploadingPdf.set(false);
-        this.pdfError.set(err?.status === 400 ? 'not-pdf' : err?.status === 413 ? 'too-big' : 'failed');
+        //507: the server's cap on all stored PDFs is reached
+        const errors: Record<number, 'not-pdf' | 'too-big' | 'storage-full'> = { 400: 'not-pdf', 413: 'too-big', 507: 'storage-full' };
+        this.pdfError.set(errors[err?.status] ?? 'failed');
       }
     });
   }

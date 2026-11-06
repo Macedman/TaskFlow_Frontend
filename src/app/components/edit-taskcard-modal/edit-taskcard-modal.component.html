@@ -257,11 +257,13 @@
                   (keydown.escape)="cancelAddingLink($event)"
                 />
               </label>
-              <span class="ml-2 text-[12px] text-(--modal-muted)">Up to 10 MB</span>
+              <span class="ml-2 text-[12px] text-(--modal-muted)">Up to 5 MB</span>
               @if (pdfError() === 'too-big') {
-                <p class="text-red-400 text-[14px] mt-2" role="alert">PDFs can be up to 10 MB.</p>
+                <p class="text-red-400 text-[14px] mt-2" role="alert">PDFs can be up to 5 MB.</p>
               } @else if (pdfError() === 'not-pdf') {
                 <p class="text-red-400 text-[14px] mt-2" role="alert">Only PDF files can be attached.</p>
+              } @else if (pdfError() === 'storage-full') {
+                <p class="text-red-400 text-[14px] mt-2" role="alert">Storage is full. Delete some PDFs to make room.</p>
               } @else if (pdfError() === 'failed') {
                 <p class="text-red-400 text-[14px] mt-2" role="alert">Couldn't upload the file.</p>
               }

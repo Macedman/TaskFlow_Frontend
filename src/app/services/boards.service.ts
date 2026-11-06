@@ -75,7 +75,8 @@ export class BoardsService {
     return this.http.post<CardAttachment>(`${environment.apiUrl}/api/addLinkAttachment`, { cardId, url, name });
   }
 
-  // Sent as form data, not JSON; the server checks it really is a PDF and at most 10 MB.
+  // Sent as form data, not JSON; the server checks it really is a PDF and at most 5 MB,
+  // and answers 507 once all stored PDFs together reach its cap.
   uploadPdfAttachment(cardId: string, file: File): Observable<CardAttachment> {
     const form = new FormData();
     form.append('cardId', cardId);
