@@ -40,3 +40,9 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Playwright browser tests
+/playwright-report
+/test-results
+/e2e/.auth
+/e2e/.uploads
