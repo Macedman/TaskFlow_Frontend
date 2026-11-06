@@ -28,8 +28,10 @@ export class AuthService {
       localStorage.setItem('user', JSON.stringify(response.user));
     }
 
+    // the user too, so the next person on this browser doesn't see the last one's name and email
     logout() {
       localStorage.removeItem('Bearer ');
+      localStorage.removeItem('user');
       this.router.navigate(['/login']);
     }
 

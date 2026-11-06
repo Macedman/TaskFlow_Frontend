@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
+import { Router } from '@angular/router';
 import { AuthService } from './auth.service';
 import { environment } from '../../environments/environment';
 
@@ -42,5 +43,16 @@ describe('AuthService', () => {
 
     expect(service.getToken()).toBe('jwt-1');
     expect(JSON.parse(localStorage.getItem('user')!)).toEqual({ id: 7, email: 'sam@example.com' });
+  });
+
+  it('logout forgets the token and the user, then goes to the login page', () => {
+    const navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+    service.saveSession({ token: 'jwt-1', user: { id: 7, email: 'sam@example.com' } });
+
+    service.logout();
+
+    expect(service.getToken()).toBeNull();
+    expect(localStorage.getItem('user')).toBeNull();
+    expect(navigate).toHaveBeenCalledOnceWith(['/login']);
   });
 });

@@ -1,46 +1,59 @@
-<nav id="navbar" class="navbar flex flex-row justify-between">
-  <div class="flex gap-5">
-    <div class="m-5">
-      <h2 class="text-2xl/9 font-bold tracking-tight text-white">Taskflow</h2>
-    </div>
-
-    <div class="m-5">
-      <h2 class="text-2xl/9 font-bold tracking-tight text-white">Workspaces</h2>
-    </div>
-
-    <div class="m-5">
-      <h2 class="text-2xl/9 font-bold tracking-tight text-white">Recent</h2>
-    </div>
-
-    <div class="m-5">
-      <h2 class="text-2xl/9 font-bold tracking-tight text-white">Starred</h2>
-    </div>
-
-    <div class="m-5">
-      <h2 class="text-2xl/9 font-bold tracking-tight text-white">Templates</h2>
-    </div>
-
-    <div class="m-5">
-      <h2 class="text-2xl/9 font-bold tracking-tight text-white">Create</h2>
-    </div>
+<nav id="navbar" class="navbar flex items-center justify-between gap-3 px-4 h-14" aria-label="Main">
+  <div class="flex items-center gap-1 sm:gap-3 min-w-0">
+    <a
+      routerLink="/dashboard"
+      class="flex items-center gap-2 rounded-md px-2 py-1 text-lg font-bold tracking-tight text-white hover:bg-(--hover-clr)"
+    >
+      <lucide-icon [img]="icons.KanbanSquare" class="size-6 text-(--accent-clr)" aria-hidden="true"></lucide-icon>
+      Taskflow
+    </a>
+    <a
+      routerLink="/dashboard"
+      routerLinkActive="bg-(--hover-clr) text-white"
+      ariaCurrentWhenActive="page"
+      class="rounded-md px-3 py-1.5 text-sm font-medium text-(--secondary-text-clr) hover:bg-(--hover-clr) hover:text-white"
+    >
+      Boards
+    </a>
+    <button
+      type="button"
+      class="flex items-center gap-1 rounded-md bg-(--accent-clr) px-2 sm:px-3 py-1.5 text-sm font-semibold text-white hover:brightness-110 cursor-pointer"
+      aria-label="Create board"
+      (click)="openCreateBoard()"
+    >
+      <lucide-icon [img]="icons.Plus" class="size-4" aria-hidden="true"></lucide-icon>
+      <span class="hidden sm:inline">Create board</span>
+    </button>
   </div>
 
-  <div class="flex gap-5">
-    <div class="m-5">
-      <h2 class="text-2xl/9 font-bold tracking-tight text-white">Search</h2>
+  <button
+    type="button"
+    class="flex items-center gap-2 rounded-full py-1 pl-1 pr-1 sm:pr-3 hover:bg-(--hover-clr) cursor-pointer"
+    aria-label="Account"
+    [cdkMenuTriggerFor]="accountMenu"
+  >
+    <span class="flex size-8 items-center justify-center rounded-full bg-indigo-500 text-xs font-bold text-white" aria-hidden="true">
+      {{ initials }}
+    </span>
+    <span class="hidden sm:inline max-w-[10rem] truncate text-sm font-medium text-white">{{ firstName }}</span>
+    <lucide-icon [img]="icons.ChevronDown" class="hidden sm:block size-4 text-(--secondary-text-clr)" aria-hidden="true"></lucide-icon>
+  </button>
+
+  <ng-template #accountMenu>
+    <div cdkMenu class="mt-2 w-64 overflow-hidden rounded-lg border border-(--line-clr) bg-[#24262b] py-1 text-sm text-(--text-clr) shadow-xl">
+      <div class="border-b border-(--line-clr) px-4 py-3">
+        <p class="truncate font-semibold text-white">{{ fullName }}</p>
+        <p class="truncate text-(--secondary-text-clr)">{{ email }}</p>
+      </div>
+      <button
+        type="button"
+        cdkMenuItem
+        class="flex w-full items-center gap-2 px-4 py-2 text-left hover:bg-(--hover-clr) focus:bg-(--hover-clr) outline-none cursor-pointer"
+        (cdkMenuItemTriggered)="logout()"
+      >
+        <lucide-icon [img]="icons.LogOut" class="size-4" aria-hidden="true"></lucide-icon>
+        Log out
+      </button>
     </div>
-    <div class="m-5">
-      <h2 class="text-2xl/9 font-bold tracking-tight text-white">
-        Notification
-      </h2>
-    </div>
-    <div class="m-5">
-      <h2 class="text-2xl/9 font-bold tracking-tight text-white">
-        Information
-      </h2>
-    </div>
-    <div class=" m-5">
-      <h2 class="text-2xl/9 font-bold tracking-tight text-white">Account</h2>
-    </div>
-  </div>
+  </ng-template>
 </nav>

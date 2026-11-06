@@ -2,10 +2,13 @@ import { Component } from '@angular/core';
 import { BoardsService } from '../../services/boards.service';
 import { Board } from '../../models/boards.model';
 import { Router } from '@angular/router';
+import { Dialog } from '@angular/cdk/dialog';
+import { NavbarComponent } from '../navbar/navbar.component';
+import { CreateBoardDialogComponent } from '../create-board-dialog/create-board-dialog.component';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [],
+  imports: [NavbarComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -19,8 +22,14 @@ export class DashboardComponent {
 
 
   constructor(private boardService: BoardsService,
-              private router: Router
+              private router: Router,
+              private dialog: Dialog
   ) {}
+
+  //the same dialog the navbar's "Create board" opens; it goes to the new board itself
+  openCreateBoard() {
+    this.dialog.open(CreateBoardDialogComponent);
+  }
 
 
   ngOnInit() {
