@@ -260,6 +260,34 @@ describe('BoardsService', () => {
     expect(result).toEqual({ card_id: 11, list_id: 2, position: 0 });
   });
 
+  it('getBoardMembers posts the boardId and returns the members', () => {
+    const members = [{ user_id: 1, full_name: 'Sam', email: 'sam@example.com', role: 'owner' }];
+    let result: unknown;
+    service.getBoardMembers('42').subscribe(list => (result = list));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/getBoardMembers`);
+    expect(req.request.body).toEqual({ boardId: '42' });
+    req.flush(members);
+
+    expect(result).toEqual(members);
+  });
+
+  it('addBoardMember posts the boardId and email', () => {
+    service.addBoardMember('42', 'ann@example.com').subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/addBoardMember`);
+    expect(req.request.body).toEqual({ boardId: '42', email: 'ann@example.com' });
+    req.flush({}, { status: 201, statusText: 'Created' });
+  });
+
+  it('removeBoardMember sends the person as memberId, never userId', () => {
+    service.removeBoardMember('42', 7).subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/removeBoardMember`);
+    expect(req.request.body).toEqual({ boardId: '42', memberId: 7 });
+    req.flush({ user_id: 7 });
+  });
+
   it('addTask surfaces a 404 when the list is not accessible', () => {
     let status: number | undefined;
     service.addTask('999', 'Buy milk').subscribe({ error: err => (status = err.status) });

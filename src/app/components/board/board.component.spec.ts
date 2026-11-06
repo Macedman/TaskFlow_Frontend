@@ -1,15 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { Dialog } from '@angular/cdk/dialog';
 import { of, Subject, throwError } from 'rxjs';
 
 import { BoardComponent } from './board.component';
 import { BoardsService } from '../../services/boards.service';
-import { BoardEventsService } from '../../services/board-events.service';
+import { BoardEvent, BoardEventsService } from '../../services/board-events.service';
 import { ListType } from '../../models/list.model';
 import { Card } from '../../models/card-details.model';
+import { ShareBoardDialogComponent } from '../share-board-dialog/share-board-dialog.component';
 
 describe('BoardComponent', () => {
   let component: BoardComponent;
@@ -17,7 +19,7 @@ describe('BoardComponent', () => {
   let boardsService: jasmine.SpyObj<BoardsService>;
   let boardEvents: jasmine.SpyObj<BoardEventsService>;
   // stands in for the socket: next() means "someone else changed this board"
-  let changedElsewhere: Subject<void>;
+  let changedElsewhere: Subject<BoardEvent>;
 
   // To Do = a0, a1, a2 and Doing = b0, as the server returns them
   const serverLists = (): ListType[] => [
@@ -31,7 +33,7 @@ describe('BoardComponent', () => {
     boardsService = jasmine.createSpyObj<BoardsService>('BoardsService', ['getTasks', 'moveCard', 'getBoards']);
     boardsService.getTasks.and.callFake(() => of(serverLists()));
     boardsService.getBoards.and.returnValue(of([]));
-    changedElsewhere = new Subject<void>();
+    changedElsewhere = new Subject<BoardEvent>();
     boardEvents = jasmine.createSpyObj<BoardEventsService>('BoardEventsService', ['boardChanges']);
     boardEvents.boardChanges.and.returnValue(changedElsewhere);
 
@@ -133,7 +135,7 @@ describe('BoardComponent', () => {
     it('reloads the board when it changes elsewhere', () => {
       serverMovedB0();
 
-      changedElsewhere.next();
+      changedElsewhere.next('changed');
 
       expect(boardsService.getTasks).toHaveBeenCalledTimes(2);
       expect(titles('To Do')).toEqual(['b0']);
@@ -144,7 +146,7 @@ describe('BoardComponent', () => {
       placeholder.className = 'cdk-drag-placeholder'; // what CDK shows while a card is dragged
       fixture.nativeElement.appendChild(placeholder);
 
-      changedElsewhere.next();
+      changedElsewhere.next('changed');
       expect(boardsService.getTasks).toHaveBeenCalledTimes(1);
 
       placeholder.remove();
@@ -157,7 +159,7 @@ describe('BoardComponent', () => {
       boardsService.moveCard.and.returnValue(saving);
       drop('To Do', 'To Do', 0, 2);
 
-      changedElsewhere.next();
+      changedElsewhere.next('changed');
       expect(boardsService.getTasks).toHaveBeenCalledTimes(1);
 
       saving.next({ card_id: 10, list_id: 1, position: 2 });
@@ -170,8 +172,8 @@ describe('BoardComponent', () => {
       const second = new Subject<ListType[]>();
       boardsService.getTasks.and.returnValues(first, second);
 
-      changedElsewhere.next();
-      changedElsewhere.next();
+      changedElsewhere.next('changed');
+      changedElsewhere.next('changed');
       second.next([{ listId: '1', listName: 'Newest', cards: [] }]);
       first.next([{ listId: '1', listName: 'Stale', cards: [] }]);
 
@@ -184,6 +186,29 @@ describe('BoardComponent', () => {
       fixture.destroy();
 
       expect(changedElsewhere.observed).toBeFalse();
+    });
+  });
+
+  describe('sharing', () => {
+    it('opens the share dialog for this board', () => {
+      const open = spyOn(TestBed.inject(Dialog), 'open');
+
+      const share = [...fixture.nativeElement.querySelectorAll('button')]
+        .find((b: HTMLButtonElement) => b.textContent?.trim() === 'Share') as HTMLButtonElement;
+      share.click();
+
+      expect(open).toHaveBeenCalledOnceWith(ShareBoardDialogComponent, { data: { boardId: '42' } });
+    });
+
+    it('closes any open dialog and goes to the dashboard when the owner removes us', () => {
+      const closeAll = spyOn(TestBed.inject(Dialog), 'closeAll');
+      const navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+
+      changedElsewhere.next('removed');
+
+      expect(closeAll).toHaveBeenCalledTimes(1);
+      expect(navigate).toHaveBeenCalledOnceWith(['/dashboard'], { state: { notice: 'You were removed from that board.' } });
+      expect(boardsService.getTasks).toHaveBeenCalledTimes(1); // no reload of a board we can't see
     });
   });
 });

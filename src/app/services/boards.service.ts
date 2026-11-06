@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ListType } from '../models/list.model';
-import { Board } from '../models/boards.model';
+import { Board, BoardMember } from '../models/boards.model';
 import { CardAttachment, CardChanges, CardComment, CardDetailsResponse, NewCardResponse } from '../models/card-details.model';
 
 @Injectable({
@@ -93,6 +93,21 @@ export class BoardsService {
   moveCard(cardId: string, listId: string, position: number): Observable<{ card_id: number; list_id: number; position: number }> {
     return this.http.post<{ card_id: number; list_id: number; position: number }>(
       `${environment.apiUrl}/api/moveCard`, { cardId, listId, position });
+  }
+
+  // Anyone on the board can see who's on it.
+  getBoardMembers(boardId: string): Observable<BoardMember[]> {
+    return this.http.post<BoardMember[]>(`${environment.apiUrl}/api/getBoardMembers`, { boardId });
+  }
+
+  // Owner only. Adds an existing account straight away; 404 when no account has that email.
+  addBoardMember(boardId: string, email: string): Observable<BoardMember> {
+    return this.http.post<BoardMember>(`${environment.apiUrl}/api/addBoardMember`, { boardId, email });
+  }
+
+  // Owner only. memberId is the person being removed, never the caller.
+  removeBoardMember(boardId: string, memberId: number): Observable<{ user_id: number }> {
+    return this.http.post<{ user_id: number }>(`${environment.apiUrl}/api/removeBoardMember`, { boardId, memberId });
   }
 
   // Returns the raw cards row; callers map it to the Card shape the board uses.

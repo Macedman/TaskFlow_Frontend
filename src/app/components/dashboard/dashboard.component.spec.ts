@@ -23,4 +23,17 @@ describe('DashboardComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('shows no notice on a normal visit', () => {
+    expect(fixture.nativeElement.querySelector('[role="status"]')).toBeNull();
+  });
+
+  it('shows the notice passed with the navigation', () => {
+    history.replaceState({ notice: 'You were removed from that board.' }, '');
+    const withNotice = TestBed.createComponent(DashboardComponent);
+    withNotice.detectChanges();
+    history.replaceState(null, '');
+
+    expect(withNotice.nativeElement.querySelector('[role="status"]')?.textContent).toContain('You were removed from that board.');
+  });
 });

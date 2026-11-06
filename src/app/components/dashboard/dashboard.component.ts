@@ -13,7 +13,10 @@ export class DashboardComponent {
   boards: Board[] = [];
   user = JSON.parse(localStorage.getItem('user') || '{}'); //transfer this to a service
   userName = this.user.full_name;
-  
+  //a one-off message passed with the navigation (router state), e.g. after being removed from a board.
+  //it isn't in the URL, so a refresh or a bookmark won't show it again
+  notice: string | null = typeof history.state?.notice === 'string' ? history.state.notice : null;
+
 
   constructor(private boardService: BoardsService,
               private router: Router

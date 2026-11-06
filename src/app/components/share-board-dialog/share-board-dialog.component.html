@@ -1,0 +1,82 @@
+<div class="w-[480px] max-w-[calc(100vw-32px)]">
+  <header class="flex justify-between items-center min-h-[56px] px-5 border-b-[1px] border-(--modal-border)">
+    <h2 class="font-[600] text-[16px]">Share board</h2>
+    <button
+      type="button"
+      aria-label="Close"
+      class="rounded p-1 hover:bg-(--modal-control-hover) cursor-pointer"
+      (click)="close()"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor">
+        <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+      </svg>
+    </button>
+  </header>
+
+  <div class="p-5 flex flex-col gap-5">
+    @if (isOwner()) {
+      <form class="flex flex-col gap-2" (submit)="$event.preventDefault(); invite()">
+        <label for="invite-email" class="text-[14px] font-[600]">Invite by email</label>
+        <div class="flex gap-2">
+          <input
+            id="invite-email"
+            type="email"
+            autocomplete="off"
+            maxlength="100"
+            placeholder="name@example.com"
+            class="flex-1 rounded bg-(--modal-field) border-1 border-(--modal-border) px-2 py-1 text-[14px] outline-none focus:border-[#669df1]"
+            [formControl]="emailControl"
+          />
+          <button
+            type="submit"
+            class="bg-[#0C66E4] text-white text-[14px] font-[500] rounded px-3 py-1 cursor-pointer disabled:opacity-60"
+            [disabled]="isInviting()"
+          >
+            {{ isInviting() ? 'Inviting…' : 'Invite' }}
+          </button>
+        </div>
+        <p class="text-[12px] text-(--modal-muted)">They need a Taskflow account. They'll see this board on their dashboard right away.</p>
+        @if (inviteError()) {
+          <p class="text-red-400 text-[14px]" role="alert">{{ inviteError() }}</p>
+        }
+      </form>
+    } @else if (members().length) {
+      <p class="text-[14px] text-(--modal-muted)">Only the board owner can invite or remove people.</p>
+    }
+
+    <section>
+      <h3 class="text-[14px] font-[600] mb-2">On this board</h3>
+      @if (loadError()) {
+        <p class="text-red-400 text-[14px]" role="alert">Couldn't load who's on this board.</p>
+      }
+      <ul class="flex flex-col gap-2">
+        @for (member of members(); track member.user_id) {
+          <li class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-[14px] font-[500] truncate">
+                {{ member.full_name }}
+                @if (member.role === 'owner') {
+                  <span class="ml-1 rounded bg-(--modal-control) px-1.5 py-0.5 text-[11px] uppercase">Owner</span>
+                }
+              </p>
+              <p class="text-[12px] text-(--modal-muted) truncate">{{ member.email }}</p>
+              @if (removeErrorId() === member.user_id) {
+                <p class="text-red-400 text-[12px]" role="alert">Couldn't remove this person.</p>
+              }
+            </div>
+            @if (isOwner() && member.role === 'member') {
+              <button
+                type="button"
+                class="shrink-0 rounded bg-(--modal-control) px-2 py-1 text-[13px] hover:bg-(--modal-control-hover) cursor-pointer"
+                [attr.aria-label]="'Remove ' + member.full_name"
+                (click)="remove(member)"
+              >
+                Remove
+              </button>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  </div>
+</div>
