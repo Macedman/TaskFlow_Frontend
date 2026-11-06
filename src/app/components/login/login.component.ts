@@ -1,17 +1,19 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
 export class LoginComponent {
   loginForm: FormGroup;
   errorMessage: string = '';
+  // e.g. "Account created. Please log in." passed by the signup page through navigation state
+  notice: string | null = typeof history.state?.notice === 'string' ? history.state.notice : null;
 
   constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
     this.loginForm = this.fb.group({
@@ -30,9 +32,7 @@ export class LoginComponent {
     const password = this.loginForm.get('password')?.value || '';
 
     this.authService.login(email, password).subscribe((response) => {
-      //save the token to local storage
-      localStorage.setItem('Bearer ', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
+      this.authService.saveSession(response);
       this.router.navigate(['/dashboard']);
     }, (error) => {
         this.errorMessage = error.error.message || 'Login failed. Please check your credentials.';

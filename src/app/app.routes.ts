@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
+import { SignupComponent } from './components/signup/signup.component';
 import { TaskcardComponent } from './components/taskcard/taskcard.component';
 import { BoardComponent } from './components/board/board.component';
 import { NotfoundComponent } from './components/notfound/notfound.component';
@@ -22,6 +23,12 @@ export const routes: Routes = [
     { 
         path: 'login',
         component: LoginComponent,
+        title: 'Login'
+    },
+    {
+        path: 'signup',
+        component: SignupComponent,
+        title: 'Sign up'
     },
     { 
         path: 'board/:boardId',
