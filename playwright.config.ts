@@ -1,5 +1,4 @@
 import { defineConfig, devices } from '@playwright/test';
-import path from 'node:path';
 
 // Their own ports, so the dev servers on 4300/5001 (and the real taskflow database) are never touched.
 // The API's address is in e2e/fixtures.ts and src/environments/environment.e2e.ts
@@ -29,13 +28,12 @@ export default defineConfig({
         DB_NAME: 'taskflow_test',
         PORT: '5002',
         CORS_ORIGIN: APP_URL,
-        UPLOADS_DIR: path.resolve('e2e/.uploads'),
       },
       reuseExistingServer: !process.env['CI'],
       timeout: 60_000,
     },
     {
-      // no watching: the tests write files inside this folder (uploads, traces), and a rebuild
+      // no watching: the tests write files inside this folder (traces, reports), and a rebuild
       // would reload every open page in the middle of a test
       command: 'npx ng serve --configuration e2e --port 4400 --watch=false --live-reload=false --hmr=false',
       url: APP_URL,

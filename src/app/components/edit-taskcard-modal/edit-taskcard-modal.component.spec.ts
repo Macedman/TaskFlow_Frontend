@@ -851,14 +851,21 @@ describe('EditTaskcardModalComponent', () => {
       expect(fileInput()).toBeNull();
     });
 
-    it('refuses a file over 10 MB without uploading it', () => {
+    it('refuses a file over 5 MB without uploading it', () => {
       open([]);
       startAttaching();
 
-      choose(pdf('huge.pdf', 10 * 1024 * 1024 + 1));
+      choose(pdf('huge.pdf', 5 * 1024 * 1024 + 1));
 
       expect(boardsService.uploadPdfAttachment).not.toHaveBeenCalled();
-      expect(text()).toContain('PDFs can be up to 10 MB.');
+      expect(text()).toContain('PDFs can be up to 5 MB.');
+    });
+
+    it('says how big a PDF can be before one is chosen', () => {
+      open([]);
+      startAttaching();
+
+      expect(text()).toContain('Up to 5 MB');
     });
 
     it('refuses a file that is not a PDF without uploading it', () => {
@@ -881,7 +888,11 @@ describe('EditTaskcardModalComponent', () => {
 
       boardsService.uploadPdfAttachment.and.returnValue(throwError(() => ({ status: 413 })));
       choose(pdf('big.pdf'));
-      expect(text()).toContain('PDFs can be up to 10 MB.');
+      expect(text()).toContain('PDFs can be up to 5 MB.');
+
+      boardsService.uploadPdfAttachment.and.returnValue(throwError(() => ({ status: 507 })));
+      choose(pdf('one-more.pdf'));
+      expect(text()).toContain('Storage is full. Delete some PDFs to make room.');
 
       boardsService.uploadPdfAttachment.and.returnValue(throwError(() => ({ status: 500 })));
       choose(pdf('ok.pdf'));
