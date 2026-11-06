@@ -1,0 +1,104 @@
+<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+    <h2
+      class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-white"
+    >
+      Create an account
+    </h2>
+  </div>
+
+  <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" novalidate>
+      <div>
+        <label for="fullname" class="font-medium text-white">Full name: </label>
+        <div class="mt-2">
+          <input
+            id="fullname"
+            type="text"
+            autocomplete="name"
+            formControlName="fullname"
+            class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+          />
+        </div>
+        @if (showError('fullname')) {
+          <p class="mt-1 text-sm text-red-400">Enter your name (up to 100 characters).</p>
+        }
+      </div>
+
+      <div class="mt-4">
+        <label for="email" class="font-medium text-white">Email: </label>
+        <div class="mt-2">
+          <input
+            id="email"
+            type="email"
+            autocomplete="email"
+            formControlName="email"
+            class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+          />
+        </div>
+        @if (showError('email')) {
+          <p class="mt-1 text-sm text-red-400">Enter a valid email address.</p>
+        }
+      </div>
+
+      <div class="mt-4">
+        <label for="password" class="font-medium text-white">Password: </label>
+        <div class="mt-2">
+          <input
+            id="password"
+            type="password"
+            autocomplete="new-password"
+            formControlName="password"
+            class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+          />
+        </div>
+        @if (showError('password')) {
+          <p class="mt-1 text-sm text-red-400">
+            @if (signupForm.get('password')?.hasError('maxBytes')) {
+              That password is too long.
+            } @else {
+              Use at least 8 characters.
+            }
+          </p>
+        }
+      </div>
+
+      <div class="mt-4">
+        <label for="confirmPassword" class="font-medium text-white">Confirm password: </label>
+        <div class="mt-2">
+          <input
+            id="confirmPassword"
+            type="password"
+            autocomplete="new-password"
+            formControlName="confirmPassword"
+            class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+          />
+        </div>
+        @if (showMismatch) {
+          <p class="mt-1 text-sm text-red-400">The passwords don't match.</p>
+        }
+      </div>
+
+      @if (errorMessage) {
+        <div class="mt-4 text-center text-sm text-red-400" role="alert">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <div class="flex justify-center mt-10">
+        <button
+          [disabled]="isSubmitting"
+          type="submit"
+          class="flex w-3xs justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        >
+          {{ isSubmitting ? 'Creating account…' : 'Sign up' }}
+        </button>
+      </div>
+    </form>
+
+    <p class="mt-6 text-center text-sm text-gray-300">
+      Already have an account?
+      <a routerLink="/login" class="font-semibold text-indigo-400 hover:text-indigo-300">Log in</a>
+    </p>
+  </div>
+</div>

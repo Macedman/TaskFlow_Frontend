@@ -11,14 +11,21 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) { }
 
-  signup(email: string, password: string): Observable<any> {
+  // The server answers with a message only, no token, so callers log in afterwards.
+  signup(fullname: string, email: string, password: string): Observable<any> {
     return this.http.post(`${environment.apiUrl}/api/signup`,
-      { email, password });
+      { fullname, email, password });
   }
 
    login(email: string, password: string): Observable<any> {
       return this.http.post(`${environment.apiUrl}/api/login`,
         { email, password });
+    }
+
+    // Login and signup both end here, so the session is always stored the same way
+    saveSession(response: { token: string; user: unknown }) {
+      localStorage.setItem('Bearer ', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
     }
 
     logout() {
