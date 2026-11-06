@@ -26,6 +26,13 @@ export class BoardsService {
     return this.http.post<Board[]>(`${environment.apiUrl}/api/getBoards`, {});
   }
 
+  // The caller becomes the owner (taken from the JWT). The server wraps the row in { message, board }.
+  createBoard(name: string): Observable<Board> {
+    return this.http
+      .post<{ board: Board }>(`${environment.apiUrl}/api/createBoards`, { name })
+      .pipe(map(({ board }) => board));
+  }
+
   // Returns the created list in the same shape as a getTasks list, so it can be added to the board as-is.
   addList(boardId: string, name: string): Observable<ListType> {
     return this.http.post<ListType>(`${environment.apiUrl}/api/addList`, { boardId, name });

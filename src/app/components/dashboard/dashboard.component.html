@@ -1,5 +1,6 @@
-<div class="min-h-screen bg-slate-950 px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
-  <section class="mx-auto flex max-w-6xl flex-col gap-6">
+<div class="min-h-screen bg-slate-950 text-slate-100">
+  <app-navbar></app-navbar>
+  <section class="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
     @if (notice) {
       <p class="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200" role="status">{{ notice }}</p>
     }
@@ -46,7 +47,14 @@
         </div>
       } @else {
         <div class="rounded-2xl border border-dashed border-slate-700 bg-slate-800/40 px-4 py-8 text-center text-slate-400">
-          No boards yet. Create your first board to get started.
+          <p>No boards yet. Create your first board to get started.</p>
+          <button
+            type="button"
+            class="mt-4 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 cursor-pointer"
+            (click)="openCreateBoard()"
+          >
+            Create your first board
+          </button>
         </div>
       }
     </div>

@@ -16,6 +16,7 @@ import {
   MoreHorizontal,
   ChevronDown,
   Clock,
+  LogOut,
 } from 'lucide-angular';
 
 export const Icons = {
@@ -36,4 +37,5 @@ export const Icons = {
   MoreHorizontal,
   ChevronDown,
   Clock,
+  LogOut,
 };

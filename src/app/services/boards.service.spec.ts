@@ -34,6 +34,19 @@ describe('BoardsService', () => {
     req.flush([]);
   });
 
+  it('createBoard sends only the name and returns the board from the reply', () => {
+    const board = { id: 5, name: 'Home', owner_id: 1 };
+    let result: unknown;
+    service.createBoard('Home').subscribe(created => (result = created));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/createBoards`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ name: 'Home' });
+    req.flush({ message: 'Board created successfully.', board }, { status: 201, statusText: 'Created' });
+
+    expect(result).toEqual(board);
+  });
+
   it('getTasks sends only the boardId', () => {
     service.getTasks('42').subscribe();
 
