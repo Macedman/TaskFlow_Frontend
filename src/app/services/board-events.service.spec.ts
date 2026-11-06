@@ -68,14 +68,25 @@ describe('BoardEventsService', () => {
   });
 
   it('emits when this board changes and ignores other boards', () => {
-    let changes = 0;
-    service.boardChanges('42').subscribe(() => changes++);
+    const events: string[] = [];
+    service.boardChanges('42').subscribe(event => events.push(event));
     socket.fire('connect');
 
     socket.fire('board:changed', { boardId: 42 });
     socket.fire('board:changed', { boardId: 7 });
 
-    expect(changes).toBe(1);
+    expect(events).toEqual(['changed']);
+  });
+
+  it('says when we were removed from this board, and only this one', () => {
+    const events: string[] = [];
+    service.boardChanges('42').subscribe(event => events.push(event));
+    socket.fire('connect');
+
+    socket.fire('board:removed', { boardId: 7 });
+    socket.fire('board:removed', { boardId: 42 });
+
+    expect(events).toEqual(['removed']);
   });
 
   it('joins again and refreshes once after a reconnect', () => {

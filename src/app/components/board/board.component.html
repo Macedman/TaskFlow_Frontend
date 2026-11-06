@@ -2,6 +2,15 @@
   <app-navbar class="navbar"></app-navbar>
   <!-- <app-sidebar class="sidebar"></app-sidebar> -->
   <div class="main mt-3 ml-3">
+    <div class="mb-3">
+      <button
+        type="button"
+        class="rounded bg-white/90 px-3 py-1 text-[14px] font-[500] text-[#172B4D] hover:bg-white cursor-pointer"
+        (click)="openShareDialog()"
+      >
+        Share
+      </button>
+    </div>
     @if (moveError()) {
       <p class="mb-3 text-red-400 text-[14px]" role="alert">Couldn't save the card's new position. The board was reloaded.</p>
     }

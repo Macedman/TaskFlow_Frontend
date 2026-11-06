@@ -9,8 +9,10 @@ import { BoardsService } from '../../services/boards.service';
 import { BoardEventsService } from '../../services/board-events.service';
 import { BottomNavigationComponent } from '../bottom-navigation/bottom-navigation.component';
 import { Board } from '../../models/boards.model';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Dialog } from '@angular/cdk/dialog';
 import { Card } from '../../models/card-details.model';
+import { ShareBoardDialogComponent } from '../share-board-dialog/share-board-dialog.component';
 import { catchError, EMPTY, Subject, Subscription, switchMap } from 'rxjs';
 
 @Component({
@@ -23,7 +25,9 @@ export class BoardComponent implements OnInit, OnDestroy {
   constructor(private boardService: BoardsService,
               private route: ActivatedRoute,
               private boardEvents: BoardEventsService,
-              private host: ElementRef<HTMLElement>
+              private host: ElementRef<HTMLElement>,
+              private dialog: Dialog,
+              private router: Router
   ) {}
 
   lists: ListType[] = [];
@@ -98,6 +102,17 @@ export class BoardComponent implements OnInit, OnDestroy {
     }
   }
 
+  //The owner took us off this board, so nothing on it will load any more. Close any open card
+  //or share dialog too: it belongs to this board and would otherwise stay over the dashboard
+  private onRemovedFromBoard() {
+    this.dialog.closeAll();
+    this.router.navigate(['/dashboard'], { state: { notice: 'You were removed from that board.' } });
+  }
+
+  openShareDialog() {
+    this.dialog.open(ShareBoardDialogComponent, { data: { boardId: this.boardId } });
+  }
+
   //CDK keeps a placeholder in the list for as long as a card is being dragged
   private isDragging() {
     return !!this.host.nativeElement.querySelector('.cdk-drag-placeholder');
@@ -119,7 +134,9 @@ getTasks() {
   this.loadLists();
   //listen for changes to this board only; moving to another board leaves the old one
   this.boardChanges?.unsubscribe();
-  this.boardChanges = this.boardEvents.boardChanges(boardId).subscribe(() => this.onBoardChangedElsewhere());
+  this.boardChanges = this.boardEvents.boardChanges(boardId).subscribe(event =>
+    event === 'removed' ? this.onRemovedFromBoard() : this.onBoardChangedElsewhere()
+  );
   }
 });
 
