@@ -55,6 +55,11 @@
           Login
         </button>
       </div>
+      @if (isWakingServer) {
+        <p class="mt-4 text-center text-sm text-gray-300" role="status">
+          Waking up the server — this can take up to a minute on the free plan…
+        </p>
+      }
     </form>
 
     <p class="mt-6 text-center text-sm text-gray-300">
